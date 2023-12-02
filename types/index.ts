@@ -1,4 +1,18 @@
-export type CardValue = '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10' | 'J' | 'Q' | 'K' | 'A'
+export enum CardValue {
+  Two = 2,
+  Three = 3,
+  Four = 4,
+  Five = 5,
+  Six = 6,
+  Seven = 7,
+  Eight = 8,
+  Nine = 9,
+  Ten = 10,
+  Jack = 11,
+  Queen = 12,
+  King = 13,
+  Ace = 14
+}
 export enum CardSuit {
   Spade,
   Club,
@@ -33,7 +47,7 @@ type User = {
   createdAt: string
 }
 
-export type Hand = { cards: (Card | null)[]; rank?: Rank }
+export type Hand = { handCards: Card[]; rank?: Rank; pokerCards?: Card[] }
 
 export type Player = {
   id: string
@@ -44,6 +58,8 @@ export type Player = {
 export type Room = {
   id: string
   roomCode: string
+  smallHouse: number
   players: Player[]
-  boardCards: [Card | null, Card | null, Card | null]
+  boardCards: Card[]
+  folded: string[]
 }
