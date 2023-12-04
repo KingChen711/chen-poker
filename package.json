@@ -11,6 +11,7 @@
     "prettier:fix": "prettier --write \"**/(*.tsx|*.ts|*.css|*.scss)\""
   },
   "dependencies": {
+    "@clerk/nextjs": "^4.27.2",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
     "eslint-config-standard": "^17.1.0",

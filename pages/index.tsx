@@ -1,6 +1,7 @@
 import { assignRankHand } from '@/lib/poker/assign-rank-hand'
 import { compareHand } from '@/lib/poker/compare'
 import { Card, CardSuit, CardValue, Hand } from '@/types'
+import { UserButton } from '@clerk/nextjs'
 import { Inter } from 'next/font/google'
 import { useEffect } from 'react'
 
@@ -74,9 +75,12 @@ export default function Home() {
   }, [])
 
   return (
-    <main className={`${inter.className}`}>
-      <div className='text-red-500'>Hello world</div>
-    </main>
+    <>
+      <header>
+        <UserButton afterSignOutUrl='/' />
+      </header>
+      <div>Your page&apos;s content can go here.</div>
+    </>
   )
 }
 
