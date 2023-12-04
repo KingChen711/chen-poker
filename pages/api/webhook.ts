@@ -3,10 +3,13 @@ import { Webhook } from 'svix'
 import { headers } from 'next/headers'
 import { WebhookEvent } from '@clerk/nextjs/server'
 // import { createdUser, deleteUser, updateUser } from '@/lib/actions/user.action'
-import { NextResponse } from 'next/server'
 import { createUser } from '../../lib/_actions/user'
+import { NextApiRequest, NextApiResponse } from 'next'
 
-export async function POST(req: Request) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method !== 'POST') {
+    return res.json({ message: 'OK' })
+  }
   // You can find this in the Clerk Dashboard -> Webhooks -> choose the webhook
   const NEXT_CLERK_WEBHOOK_SECRET = process.env.NEXT_CLERK_WEBHOOK_SECRET
 
@@ -22,13 +25,11 @@ export async function POST(req: Request) {
 
   // If there are no headers, error out
   if (!svix_id || !svix_timestamp || !svix_signature) {
-    return new Response('Error occured -- no svix headers', {
-      status: 400
-    })
+    return res.status(400).json({ message: 'Error occured -- no svix headers' })
   }
 
   // Get the body
-  const payload = await req.json()
+  const payload = await req.body
   const body = JSON.stringify(payload)
 
   // Create a new Svix instance with your secret.
@@ -45,9 +46,7 @@ export async function POST(req: Request) {
     }) as WebhookEvent
   } catch (err) {
     console.error('Error verifying webhook:', err)
-    return new Response('Error occured', {
-      status: 400
-    })
+    return res.status(400).json({ message: 'Error occured' })
   }
 
   const eventType = evt.type
@@ -63,7 +62,7 @@ export async function POST(req: Request) {
       username: username!
     })
 
-    return NextResponse.json({ message: 'ok', user: mongoUser })
+    return res.json({ message: 'ok', user: mongoUser })
   }
 
   if (eventType === 'user.updated') {
@@ -81,7 +80,7 @@ export async function POST(req: Request) {
     // })
 
     // return NextResponse.json({ message: 'ok', user: mongoUser })
-    return NextResponse.json({ message: 'ok' })
+    return res.json({ message: 'ok' })
   }
 
   if (eventType === 'user.deleted') {
@@ -92,8 +91,8 @@ export async function POST(req: Request) {
     // })
 
     // return NextResponse.json({ message: 'ok', user: deletedUser })
-    return NextResponse.json({ message: 'ok' })
+    return res.json({ message: 'ok' })
   }
 
-  return NextResponse.json({ message: 'OK' })
+  return res.json({ message: 'OK' })
 }
