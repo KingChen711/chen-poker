@@ -3,19 +3,18 @@ const nextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: '*'
+        protocol: "https",
+        hostname: "*",
       },
       {
-        protocol: 'http',
-        hostname: '*'
-      }
-    ]
+        protocol: "http",
+        hostname: "*",
+      },
+    ],
   },
   experimental: {
     mdxRs: true,
-    serverComponentsExternalPackages: ['mongoose']
-  }
-}
+  },
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;

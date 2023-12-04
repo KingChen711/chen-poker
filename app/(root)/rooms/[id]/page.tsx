@@ -6,19 +6,24 @@ import { useRoom } from '@/hooks/useRoom'
 import { getUserByClerkId } from '@/lib/actions/user'
 import { User } from '@/types'
 import { useAuth } from '@clerk/nextjs'
-import { useRouter } from 'next/router'
+import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 
-function RoomDetailPage() {
+type Props = {
+  params: {
+    id: string
+  }
+}
+
+function RoomDetailPage({ params }: Props) {
   const router = useRouter()
-  const roomId = router.query.id as string
 
   const user = useCurrentUser()
-  const room = useRoom(roomId)
+  // const room = useRoom(roomId)
 
-  console.log({ room })
+  // console.log({ room })
 
-  return <div>This is room: {roomId}</div>
+  return <div>This is room: {params.id}</div>
 }
 
 export default RoomDetailPage
