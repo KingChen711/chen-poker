@@ -1,7 +1,9 @@
+'use client'
+
 import { useCurrentUser } from '@/hooks/useCurrentUser'
 import useFirestore from '@/hooks/useFirestore'
 import { useRoom } from '@/hooks/useRoom'
-import { getUserByClerkId } from '@/lib/_actions/user'
+import { getUserByClerkId } from '@/lib/actions/user'
 import { User } from '@/types'
 import { useAuth } from '@clerk/nextjs'
 import { useRouter } from 'next/router'

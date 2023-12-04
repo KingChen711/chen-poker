@@ -4,7 +4,7 @@ import { headers } from 'next/headers'
 import { WebhookEvent } from '@clerk/nextjs/server'
 // import { createdUser, deleteUser, updateUser } from '@/lib/actions/user.action'
 import { NextResponse } from 'next/server'
-import { createUser, deleteUser, updateUser } from '@/lib/_actions/user'
+import { createUser, deleteUser, updateUser } from '@/lib/actions/user'
 
 export async function GET() {
   return NextResponse.json({ message: 'ok' })

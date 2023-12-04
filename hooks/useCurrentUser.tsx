@@ -1,4 +1,4 @@
-import { getUserByClerkId } from '@/lib/_actions/user'
+import { getUserByClerkId } from '@/lib/actions/user'
 import { User } from '@/types'
 import { useAuth } from '@clerk/nextjs'
 import { useEffect, useState } from 'react'
