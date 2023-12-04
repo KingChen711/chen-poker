@@ -38,8 +38,9 @@ export enum Rank {
   RoyalFlush
 }
 
-type User = {
+export type User = {
   id: string
+  clerkId: string
   picture: string
   email: string
   username: string

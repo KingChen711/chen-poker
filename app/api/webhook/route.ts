@@ -4,7 +4,7 @@ import { headers } from 'next/headers'
 import { WebhookEvent } from '@clerk/nextjs/server'
 // import { createdUser, deleteUser, updateUser } from '@/lib/actions/user.action'
 import { NextResponse } from 'next/server'
-import { createUser } from '@/lib/_actions/user'
+import { createUser, deleteUser, updateUser } from '@/lib/_actions/user'
 
 export async function GET() {
   return NextResponse.json({ message: 'ok' })
@@ -59,7 +59,7 @@ export async function POST(req: Request) {
   if (eventType === 'user.created') {
     const { id, email_addresses, image_url, username, first_name, last_name } = evt.data
 
-    const mongoUser = await createUser({
+    const user = await createUser({
       clerkId: id,
       email: email_addresses[0].email_address,
       name: `${first_name}${last_name ? ` ${last_name}` : ''}`,
@@ -67,34 +67,31 @@ export async function POST(req: Request) {
       username: username!
     })
 
-    return NextResponse.json({ message: 'ok', user: mongoUser })
+    return NextResponse.json({ message: 'ok', user })
   }
 
   if (eventType === 'user.updated') {
     const { id, email_addresses, image_url, username, first_name, last_name } = evt.data
 
-    // const mongoUser = await updateUser({
-    //   clerkId: id,
-    //   updateData: {
-    //     email: email_addresses[0].email_address,
-    //     name: `${first_name}${last_name ? ` ${last_name}` : ''}`,
-    //     picture: image_url,
-    //     username: username!
-    //   },
-    //   path: `/profile/${id}`
-    // })
+    const user = await updateUser({
+      clerkId: id,
+      email: email_addresses[0].email_address,
+      name: `${first_name}${last_name ? ` ${last_name}` : ''}`,
+      picture: image_url,
+      username: username!
+    })
 
-    return NextResponse.json({ message: 'ok' })
+    return NextResponse.json({ message: 'ok', user })
   }
 
   if (eventType === 'user.deleted') {
     const { id } = evt.data
 
-    // const deletedUser = await deleteUser({
-    //   clerkId: id!
-    // })
+    const deletedUser = await deleteUser({
+      clerkId: id!
+    })
 
-    return NextResponse.json({ message: 'ok' })
+    return NextResponse.json({ message: 'ok', user: deletedUser })
   }
 
   return NextResponse.json({ message: 'OK' })

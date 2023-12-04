@@ -1,4 +1,4 @@
-import { addDoc, collection, doc, getDocs, serverTimestamp, updateDoc } from 'firebase/firestore'
+import { addDoc, collection, deleteDoc, doc, getDocs, serverTimestamp, updateDoc } from 'firebase/firestore'
 import { db } from '.'
 import firebase from 'firebase/compat/app'
 
@@ -24,7 +24,7 @@ export const updateData = async ({ collectionName, data }: TAddData) => {
   try {
     updateDoc(doc(db, collectionName, data.id), data)
   } catch (e) {
-    console.error('Error adding document: ', e)
+    console.error('Error update document: ', e)
   }
 }
 
@@ -32,7 +32,7 @@ type TReadData = {
   collectionName: string
 }
 
-export const reedData = async ({ collectionName }: TReadData) => {
+export const readData = async ({ collectionName }: TReadData) => {
   try {
     const querySnapshot = await getDocs(collection(db, collectionName))
     const documents = querySnapshot.docs
@@ -45,5 +45,19 @@ export const reedData = async ({ collectionName }: TReadData) => {
     return documents
   } catch (e) {
     console.error('Error reading document: ', e)
+    return []
+  }
+}
+
+type TDeleteData = {
+  collectionName: string
+  id: string
+}
+
+export const deleteData = async ({ collectionName, id }: TDeleteData) => {
+  try {
+    deleteDoc(doc(db, collectionName, id))
+  } catch (e) {
+    console.error('Error delete document: ', e)
   }
 }
