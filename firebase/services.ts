@@ -22,7 +22,7 @@ export const addData = async ({ collectionName, data }: TAddData) => {
 
 export const updateData = async ({ collectionName, data }: TAddData) => {
   try {
-    updateDoc(doc(db, collectionName, data.id), data)
+    await updateDoc(doc(db, collectionName, data.id), data)
   } catch (e) {
     console.error('Error update document: ', e)
   }
@@ -56,7 +56,7 @@ type TDeleteData = {
 
 export const deleteData = async ({ collectionName, id }: TDeleteData) => {
   try {
-    deleteDoc(doc(db, collectionName, id))
+    await deleteDoc(doc(db, collectionName, id))
   } catch (e) {
     console.error('Error delete document: ', e)
   }

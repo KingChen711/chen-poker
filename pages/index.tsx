@@ -1,3 +1,5 @@
+import { Button } from '@/components/ui/button'
+import { updateUser } from '@/lib/_actions/user'
 import { assignRankHand } from '@/lib/poker/assign-rank-hand'
 import { compareHand } from '@/lib/poker/compare'
 import { Card, CardSuit, CardValue, Hand } from '@/types'
@@ -79,6 +81,20 @@ export default function Home() {
       <header>
         <UserButton afterSignOutUrl='/' />
       </header>
+      <Button
+        onClick={() => {
+          updateUser({
+            clerkId: 'user_2Z4te4YIdwSTTTlra0PoEmNCAs8',
+            email: 'kingchenobama711@gmail.com',
+            name: 'Trương Văn Trần',
+            picture:
+              'https://img.clerk.com/eyJ0eXBlIjoicHJveHkiLCJzcmMiOiJodHRwczovL2ltYWdlcy5jbGVyay5kZXYvb2F1dGhfZ29vZ2xlL2ltZ18yWjR0ZHhUWnhnM3gwSEhUZ2tZOEdHVmVYNkQifQ',
+            username: 'hahahaha'
+          })
+        }}
+      >
+        Update user
+      </Button>
       <div>Your page&apos;s content can go here.</div>
     </>
   )

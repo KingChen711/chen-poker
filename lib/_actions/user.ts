@@ -15,6 +15,7 @@ export async function createUser(params: CreateUserParams) {
 export async function updateUser(params: CreateUserParams) {
   const { clerkId } = params
   const users = (await readData({ collectionName: 'users' })) as User[]
+
   const user = users.find((user) => user.clerkId === clerkId)
 
   if (user) {
