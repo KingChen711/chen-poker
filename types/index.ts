@@ -46,21 +46,30 @@ export type User = {
   username: string
   name: string
   createdAt: string
+  currentRoom?: string // room id
 }
 
 export type Hand = { handCards: Card[]; rank?: Rank; pokerCards?: Card[] }
 
+// just use in room
 export type Player = {
-  id: string
   user: User
   hand: Hand
+  balance: number // init 10000
 }
+
+// small value =100, big value =200
 
 export type Room = {
   id: string
   roomCode: string
-  smallHouse: number
+  roomOwner: string // user id
   players: Player[]
+
+  dealer: string // user id
+  smallHouse: string // user id
+  bigHouse: string // user id
+  readyPlayers: string[] // user id
+  foldPlayers: string[] // user id
   boardCards: Card[]
-  folded: string[]
 }

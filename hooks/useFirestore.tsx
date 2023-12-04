@@ -29,23 +29,23 @@ const useFirestore = ({ collectionName, condition }: Params) => {
     }
 
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const documents: Document[] = querySnapshot.docs
-        .map((doc) => {
-          console.log(new Date(doc.data().createdAt?.seconds * 1000).toUTCString())
+      const documents: Document[] = []
 
-          return {
-            ...doc.data(),
-            id: doc.id,
-            createdAt: new Date(doc.data().createdAt?.seconds * 1000)
-          }
+      querySnapshot.forEach((doc) => {
+        documents.push({
+          ...doc.data(),
+          id: doc.id,
+          createdAt: new Date(doc.data().createdAt?.seconds * 1000)
         })
-        .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+      })
+
+      documents.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
 
       setDocuments(documents)
     })
 
     return unsubscribe
-  }, [collection, condition])
+  }, [condition, collectionName])
 
   return documents
 }

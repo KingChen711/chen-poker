@@ -8,11 +8,27 @@ type CreateUserParams = {
   picture: string
   username: string
 }
+
+type UpdateUserParams = {
+  clerkId: string
+  email: string
+  name: string
+  picture: string
+  username: string
+} & {
+  currentRoom?: string
+}
+
 export async function createUser(params: CreateUserParams) {
   await addData({ collectionName: 'users', data: params })
 }
 
-export async function updateUser(params: CreateUserParams) {
+export async function getUserByClerkId(clerkId: string) {
+  const users = (await readData({ collectionName: 'users' })) as User[]
+  return users.find((user) => user.clerkId === clerkId)
+}
+
+export async function updateUser(params: UpdateUserParams) {
   const { clerkId } = params
   const users = (await readData({ collectionName: 'users' })) as User[]
 
