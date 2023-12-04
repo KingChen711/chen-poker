@@ -1,5 +1,5 @@
 import { Hand, Rank } from '@/types'
-import {  handToSecondBitField } from './convert'
+import { handToSecondBitField } from './convert'
 import { compareCard } from './compare'
 
 export function checkFourOfKind(hand: Hand) {

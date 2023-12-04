@@ -1,5 +1,5 @@
 import { Card, Hand, Rank } from '@/types'
-import {  handToFirstBitField } from './convert'
+import { handToFirstBitField } from './convert'
 import { compareCard } from './compare'
 
 export function checkStraight(hand: Hand) {
