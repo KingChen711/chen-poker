@@ -4,7 +4,8 @@ import React from 'react'
 import { Inter, Space_Grotesk } from 'next/font/google'
 import type { Metadata } from 'next'
 import './globals.css'
-import ThemeProvider from '@/contexts/ThemeProvider'
+import { ThemeProvider } from '@/contexts/ThemeProvider'
+import { viVN } from '@clerk/localizations'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -23,25 +24,20 @@ export const metadata: Metadata = {
   description:
     'Discover the best in online poker at Chen Poker. Enjoy seamless gameplay, diverse variants, and a vibrant community. Join us for an immersive experience with optimized metadata for easy searchability. Your journey to poker excellence starts here!',
   icons: {
-    icon: '/assets/images/site-logo.svg'
+    icon: '/assets/images/chip.png'
   }
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <ClerkProvider
-      appearance={{
-        elements: {
-          formButtonPrimary: 'primary-gradient',
-          footerActionLink: 'primary-text-gradient hover:text-primary-500'
-        }
-      }}
-    >
-      <ThemeProvider>
-        <html lang='en'>
-          <body className={`${inter.variable} ${spaceGrotesk.variable}`}>{children}</body>
-        </html>
-      </ThemeProvider>
+    <ClerkProvider localization={viVN}>
+      <html lang='en'>
+        <body className={`${inter.variable} ${spaceGrotesk.variable}`}>
+          <ThemeProvider attribute='class' defaultTheme='system' enableSystem disableTransitionOnChange>
+            {children}
+          </ThemeProvider>
+        </body>
+      </html>
     </ClerkProvider>
   )
 }
