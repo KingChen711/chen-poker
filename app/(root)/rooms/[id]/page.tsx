@@ -17,7 +17,7 @@ type Props = {
 function RoomDetailPage({ params }: Props) {
   const router = useRouter()
   const user = useCurrentUser()
-  const room = useRoom(params.id)
+  const { room, players } = useRoom(params.id)
   const [isLeavingRoom, setIsLeavingRoom] = useState(false)
 
   const handleLeaveRoom = async () => {

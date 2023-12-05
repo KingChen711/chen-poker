@@ -1,14 +1,14 @@
 import { addData, deleteData, getById, readData, updateData } from '@/firebase/services'
 import { generateRoomCode } from '../utils'
-import { getUserByClerkId, updateUser } from './user'
 import { Room, User } from '@/types'
+import { getUserById, updateUser } from './user'
 
 type CreateRoomParams = {
-  clerkId: string // room owner
+  userId: string // room owner
 }
 
-export async function createRoom({ clerkId }: CreateRoomParams) {
-  const user = await getUserByClerkId(clerkId)
+export async function createRoom({ userId }: CreateRoomParams) {
+  const user = await getUserById(userId)
 
   if (!user) {
     throw new Error('Not found user!')
@@ -22,8 +22,8 @@ export async function createRoom({ clerkId }: CreateRoomParams) {
     collectionName: 'rooms',
     data: {
       roomCode: generateRoomCode(),
-      roomOwner: user.id,
-      players: [{ user }],
+      roomOwner: userId,
+      players: [{ userId: user.id }],
       dealer: null,
       smallHouse: null,
       bigHouse: null,
@@ -38,8 +38,8 @@ export async function createRoom({ clerkId }: CreateRoomParams) {
   return { roomId }
 }
 
-export async function getCurrentRoom({ clerkId }: { clerkId: string }) {
-  const user = await getUserByClerkId(clerkId)
+export async function getCurrentRoom({ userId }: { userId: string }) {
+  const user = await getUserById(userId)
 
   if (!user) {
     throw new Error('Not found user!')
@@ -56,13 +56,11 @@ type LeaveRoomParams = { userId: string }
 
 export async function leaveRoom({ userId }: LeaveRoomParams) {
   try {
-    const user = (await getById({ collectionName: 'users', id: userId })) as User | null
+    const user = await getUserById(userId)
 
     if (!user) {
       throw new Error('Not found user!')
     }
-
-    console.log({ user })
 
     const roomId = user.currentRoom
     if (!roomId) {
@@ -73,28 +71,23 @@ export async function leaveRoom({ userId }: LeaveRoomParams) {
     await updateData({ collectionName: 'users', data: { ...user, currentRoom: null } })
 
     // handle room
-    const room = (await getById({ collectionName: 'rooms', id: roomId })) as Room | null
-    console.log('1')
+    const room = await getRoomById(roomId)
+
     if (!room) {
-      console.log('2')
       throw new Error('Not found room!')
     }
-    console.log('3')
-    room.players = room.players.filter((p) => p.user.id !== userId)
-    if (room.players.length === 0) {
-      console.log('Empty room')
-      console.log({ room })
+
+    room.players = room.players?.filter((p) => p.userId !== userId)
+    if (room.players?.length === 0) {
       await deleteData({ collectionName: 'rooms', id: roomId })
       return
     }
 
-    room.readyPlayers = room.readyPlayers.filter((p) => p !== userId)
+    room.readyPlayers = room.readyPlayers?.filter((p) => p !== userId)
     if (room.roomOwner === userId) {
       // need to change roomOwner
-      room.roomOwner = room.players[0].user.id
+      room.roomOwner = room.players?.[0].userId
     }
-
-    console.log('123', { room })
 
     await updateData({ collectionName: 'rooms', data: room })
   } catch (error) {
@@ -112,10 +105,14 @@ type JoinRoomParams = { userId: string; roomCode: string }
 
 export async function joinRoom({ userId, roomCode }: JoinRoomParams) {
   try {
-    const user = (await getById({ collectionName: 'users', id: userId })) as User | null
+    const user = (await getUserById(userId)) as User
 
     if (!user) {
       throw new Error('Not found user!')
+    }
+
+    if (user.currentRoom) {
+      throw new Error('You are already in a room!')
     }
 
     const room = await getRoomByCode(roomCode)
@@ -124,8 +121,27 @@ export async function joinRoom({ userId, roomCode }: JoinRoomParams) {
       throw new Error('Not found room!')
     }
 
-    console.log({ room, user })
+    if (room.inGame) {
+      throw new Error('You cannot join a room in game!')
+    }
+
+    // handle user
+    user.currentRoom = room.id
+
+    await updateData({ collectionName: 'users', data: user })
+
+    // handle room
+    // @ts-ignore
+    room.players.push({ userId: user.id })
+    await updateData({ collectionName: 'rooms', data: room })
+
+    return room.id
   } catch (error) {
     console.log(error)
   }
+}
+
+export async function getRoomById(roomId: string) {
+  const room = (await getById({ collectionName: 'rooms', id: roomId })) as Room | null
+  return { ...room, id: roomId }
 }

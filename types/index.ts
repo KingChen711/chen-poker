@@ -53,7 +53,8 @@ export type Hand = { handCards: Card[]; rank?: Rank; pokerCards?: Card[] }
 
 // just use in room
 export type Player = {
-  user: User
+  userId: string
+  user?: User
   hand: Hand
   balance: number // init 10000
 }
@@ -65,6 +66,7 @@ export type Room = {
   roomCode: string
   roomOwner: string // user id
   players: Player[]
+  inGame: boolean
 
   dealer: string // user id
   smallHouse: string // user id

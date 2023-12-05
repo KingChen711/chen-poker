@@ -8,6 +8,7 @@
   ],
   "plugins": ["prettier"],
   "rules": {
+    "no-unused-vars": "off",
     "prettier/prettier": [
       "warn",
       {

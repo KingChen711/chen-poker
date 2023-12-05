@@ -10,17 +10,16 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
 function Home() {
-  const { userId: clerkId } = useAuth()
   const router = useRouter()
   const [roomCode, setRoomCode] = useState('')
   const user = useCurrentUser()
 
   const handleCreateNewRoom = async () => {
-    if (!clerkId) {
+    if (!user) {
       return
     }
     try {
-      const response = await createRoom({ clerkId })
+      const response = await createRoom({ userId: user.id })
       router.push(`/rooms/${response?.roomId}`)
     } catch (error) {
       console.log(error)
@@ -37,11 +36,11 @@ function Home() {
   }
 
   const handleJoinCurrentRoom = async () => {
-    if (!clerkId) {
+    if (!user) {
       return
     }
     try {
-      const response = await getCurrentRoom({ clerkId })
+      const response = await getCurrentRoom({ userId: user.id })
       router.push(`/rooms/${response.roomId}`)
     } catch (error) {
       // @ts-ignore
@@ -56,18 +55,13 @@ function Home() {
   }
 
   const handleJoinRoom = async () => {
-    console.log('handleJoinRoom')
-
     if (!user || !roomCode) {
-      console.log({ user, roomCode })
       return
     }
 
     try {
-      const response = await joinRoom({ roomCode, userId: user.id })
-      console.log(response)
-
-      // router.push(`/rooms/${response.roomId}`)
+      const roomId = await joinRoom({ roomCode, userId: user.id })
+      router.push(`/rooms/${roomId}`)
     } catch (error) {
       // @ts-ignore
       if (error.message === 'Not found your current room!') {
