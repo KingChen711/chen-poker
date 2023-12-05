@@ -1,6 +1,5 @@
-import { addDoc, collection, deleteDoc, doc, getDocs, serverTimestamp, updateDoc } from 'firebase/firestore'
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, serverTimestamp, updateDoc } from 'firebase/firestore'
 import { db } from '.'
-import firebase from 'firebase/compat/app'
 
 type TAddData = {
   collectionName: string
@@ -59,5 +58,14 @@ export const deleteData = async ({ collectionName, id }: TDeleteData) => {
     await deleteDoc(doc(db, collectionName, id))
   } catch (e) {
     console.error('Error delete document: ', e)
+  }
+}
+
+export const getById = async ({ collectionName, id }: TDeleteData) => {
+  try {
+    const docRef = await getDoc(doc(db, collectionName, id))
+    return docRef.data()
+  } catch (error) {
+    return null
   }
 }

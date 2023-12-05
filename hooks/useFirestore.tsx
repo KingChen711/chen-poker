@@ -1,6 +1,6 @@
 import { db } from '@/firebase'
 import { collection, query, where, onSnapshot, WhereFilterOp } from 'firebase/firestore'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 type Params = {
   collectionName: string

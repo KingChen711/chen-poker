@@ -4,8 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { toast } from '@/components/ui/use-toast'
 import { createRoom, getCurrentRoom } from '@/lib/actions/room'
-import { UserButton, useAuth } from '@clerk/nextjs'
-import { useTheme } from 'next-themes'
+import { useAuth } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
@@ -47,17 +46,17 @@ function Home() {
       if (error.message === 'Not found your current room!') {
         toast({
           variant: 'destructive',
-          title: 'Not found your current room!',
-          description: 'Try join a room by code or create a new room'
+          title: 'Không tìm thấy phòng hiện tại của bạn!',
+          description: 'Hãy tham gia hoặc tạo phòng mới'
         })
       }
     }
   }
 
   return (
-    <main className='grid grid-cols-12 mt-8'>
+    <main className='mt-8 grid grid-cols-12'>
       <div className='col-span-6'>
-        <div className='flex gap-4 mb-4'>
+        <div className='mb-4 flex gap-4'>
           <Button onClick={handleJoinCurrentRoom}>Vào phòng hiện tại của bạn</Button>
           <Button onClick={handleCreateNewRoom}>Tạo phòng mới</Button>
         </div>

@@ -30,7 +30,15 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <ClerkProvider localization={viVN}>
+    <ClerkProvider
+      localization={viVN}
+      appearance={{
+        elements: {
+          formButtonPrimary: 'primary-gradient',
+          footerActionLink: 'primary-text-gradient hover:text-primary'
+        }
+      }}
+    >
       <html lang='en'>
         <body className={`${inter.variable} ${spaceGrotesk.variable}`}>
           <ThemeProvider attribute='class' defaultTheme='system' enableSystem disableTransitionOnChange>

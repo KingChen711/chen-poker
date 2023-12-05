@@ -22,7 +22,7 @@ export async function createRoom({ clerkId }: CreateRoomParams) {
     data: {
       roomCode: generateRoomCode(),
       roomOwner: user.id,
-      players: [user.id],
+      players: [{ user }],
       dealer: null,
       smallHouse: null,
       bigHouse: null,
