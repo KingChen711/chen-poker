@@ -4,7 +4,7 @@ import Loader from '@/components/shared/Loader'
 import { Button } from '@/components/ui/button'
 import { useCurrentUser } from '@/hooks/useCurrentUser'
 import { useRoom } from '@/hooks/useRoom'
-import { leaveRoom } from '@/lib/actions/user'
+import { leaveRoom } from '@/lib/actions/room'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
@@ -19,8 +19,6 @@ function RoomDetailPage({ params }: Props) {
   const user = useCurrentUser()
   const room = useRoom(params.id)
   const [isLeavingRoom, setIsLeavingRoom] = useState(false)
-
-  console.log({ room })
 
   const handleLeaveRoom = async () => {
     setIsLeavingRoom(true)
@@ -39,7 +37,9 @@ function RoomDetailPage({ params }: Props) {
 
   return (
     <div className='flex flex-col'>
-      This is room: {params.id}
+      <div>ID phòng: {params.id}</div>
+      <div>Mã phòng: {room?.roomCode}</div>
+
       <div className='mt-4'>
         <Button disabled={isLeavingRoom} onClick={handleLeaveRoom}>
           Rời phòng {isLeavingRoom && <Loader />}

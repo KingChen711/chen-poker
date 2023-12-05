@@ -3,7 +3,8 @@
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { toast } from '@/components/ui/use-toast'
-import { createRoom, getCurrentRoom } from '@/lib/actions/room'
+import { useCurrentUser } from '@/hooks/useCurrentUser'
+import { createRoom, getCurrentRoom, joinRoom } from '@/lib/actions/room'
 import { useAuth } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -12,6 +13,7 @@ function Home() {
   const { userId: clerkId } = useAuth()
   const router = useRouter()
   const [roomCode, setRoomCode] = useState('')
+  const user = useCurrentUser()
 
   const handleCreateNewRoom = async () => {
     if (!clerkId) {
@@ -53,6 +55,31 @@ function Home() {
     }
   }
 
+  const handleJoinRoom = async () => {
+    console.log('handleJoinRoom')
+
+    if (!user || !roomCode) {
+      console.log({ user, roomCode })
+      return
+    }
+
+    try {
+      const response = await joinRoom({ roomCode, userId: user.id })
+      console.log(response)
+
+      // router.push(`/rooms/${response.roomId}`)
+    } catch (error) {
+      // @ts-ignore
+      if (error.message === 'Not found your current room!') {
+        toast({
+          variant: 'destructive',
+          title: 'Không tìm thấy phòng hiện tại của bạn!',
+          description: 'Hãy tham gia hoặc tạo phòng mới'
+        })
+      }
+    }
+  }
+
   return (
     <main className='mt-8 grid grid-cols-12'>
       <div className='col-span-6'>
@@ -66,8 +93,8 @@ function Home() {
             onChange={(e) => setRoomCode(e.target.value)}
             className='max-w-xs'
             placeholder='Nhập mã phòng tại đây'
-          />{' '}
-          <Button disabled={!roomCode} variant='link'>
+          />
+          <Button onClick={handleJoinRoom} disabled={!roomCode} variant='link'>
             Tham gia
           </Button>
         </div>
