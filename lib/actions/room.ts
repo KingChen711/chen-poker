@@ -55,44 +55,40 @@ export async function getCurrentRoom({ userId }: { userId: string }) {
 type LeaveRoomParams = { userId: string }
 
 export async function leaveRoom({ userId }: LeaveRoomParams) {
-  try {
-    const user = await getUserById(userId)
+  const user = await getUserById(userId)
 
-    if (!user) {
-      throw new Error('Not found user!')
-    }
-
-    const roomId = user.currentRoom
-    if (!roomId) {
-      throw new Error('Not found current room!')
-    }
-
-    // handle user
-    await updateData({ collectionName: 'users', data: { ...user, currentRoom: null } })
-
-    // handle room
-    const room = await getRoomById(roomId)
-
-    if (!room) {
-      throw new Error('Not found room!')
-    }
-
-    room.players = room.players?.filter((p) => p.userId !== userId)
-    if (room.players?.length === 0) {
-      await deleteData({ collectionName: 'rooms', id: roomId })
-      return
-    }
-
-    room.readyPlayers = room.readyPlayers?.filter((p) => p !== userId)
-    if (room.roomOwner === userId) {
-      // need to change roomOwner
-      room.roomOwner = room.players?.[0].userId
-    }
-
-    await updateData({ collectionName: 'rooms', data: room })
-  } catch (error) {
-    console.log(error)
+  if (!user) {
+    throw new Error('Not found user!')
   }
+
+  const roomId = user.currentRoom
+  if (!roomId) {
+    throw new Error('Not found current room!')
+  }
+
+  // handle user
+  await updateData({ collectionName: 'users', data: { ...user, currentRoom: null } })
+
+  // handle room
+  const room = await getRoomById(roomId)
+
+  if (!room) {
+    throw new Error('Not found room!')
+  }
+
+  room.players = room.players?.filter((p) => p.userId !== userId)
+  if (room.players?.length === 0) {
+    await deleteData({ collectionName: 'rooms', id: roomId })
+    return
+  }
+
+  room.readyPlayers = room.readyPlayers?.filter((p) => p !== userId)
+  if (room.roomOwner === userId) {
+    // need to change roomOwner
+    room.roomOwner = room.players?.[0].userId
+  }
+
+  await updateData({ collectionName: 'rooms', data: room })
 }
 
 export const getRoomByCode = async (roomCode: string) => {
@@ -104,6 +100,47 @@ export const getRoomByCode = async (roomCode: string) => {
 type JoinRoomParams = { userId: string; roomCode: string }
 
 export async function joinRoom({ userId, roomCode }: JoinRoomParams) {
+  const user = (await getUserById(userId)) as User
+  console.log('join room')
+
+  if (!user) {
+    throw new Error('Not found user!')
+  }
+
+  const room = await getRoomByCode(roomCode)
+
+  if (!room) {
+    throw new Error('Not found room!')
+  }
+
+  if (user.currentRoom === room.id) {
+    return room.id
+  }
+
+  if (user.currentRoom && user.currentRoom !== room.id) {
+    throw new Error('You are already in a room!')
+  }
+
+  if (room.inGame) {
+    throw new Error('You cannot join a room in game!')
+  }
+
+  // handle user
+  user.currentRoom = room.id
+
+  await updateData({ collectionName: 'users', data: user })
+
+  // handle room
+  // @ts-ignore
+  room.players.push({ userId: user.id })
+  await updateData({ collectionName: 'rooms', data: room })
+
+  return room.id
+}
+
+type toggleReadyParams = { userId: string; roomId: string; isReady: boolean }
+
+export async function toggleReady({ userId, roomId, isReady }: toggleReadyParams) {
   try {
     const user = (await getUserById(userId)) as User
 
@@ -111,28 +148,17 @@ export async function joinRoom({ userId, roomCode }: JoinRoomParams) {
       throw new Error('Not found user!')
     }
 
-    if (user.currentRoom) {
-      throw new Error('You are already in a room!')
-    }
-
-    const room = await getRoomByCode(roomCode)
+    const room = await getRoomById(roomId)
 
     if (!room) {
       throw new Error('Not found room!')
     }
 
-    if (room.inGame) {
-      throw new Error('You cannot join a room in game!')
+    if (isReady) {
+      room.readyPlayers = room.readyPlayers?.filter((p) => p !== userId)
+    } else {
+      room.readyPlayers?.push(userId)
     }
-
-    // handle user
-    user.currentRoom = room.id
-
-    await updateData({ collectionName: 'users', data: user })
-
-    // handle room
-    // @ts-ignore
-    room.players.push({ userId: user.id })
     await updateData({ collectionName: 'rooms', data: room })
 
     return room.id

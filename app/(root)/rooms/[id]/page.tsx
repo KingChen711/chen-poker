@@ -4,9 +4,10 @@ import Loader from '@/components/shared/Loader'
 import { Button } from '@/components/ui/button'
 import { useCurrentUser } from '@/hooks/useCurrentUser'
 import { useRoom } from '@/hooks/useRoom'
-import { leaveRoom } from '@/lib/actions/room'
+import { leaveRoom, toggleReady } from '@/lib/actions/room'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 type Props = {
   params: {
@@ -17,7 +18,7 @@ type Props = {
 function RoomDetailPage({ params }: Props) {
   const router = useRouter()
   const user = useCurrentUser()
-  const { room, players } = useRoom(params.id)
+  const { room, players, isReady } = useRoom(params.id)
   const [isLeavingRoom, setIsLeavingRoom] = useState(false)
 
   const handleLeaveRoom = async () => {
@@ -35,15 +36,54 @@ function RoomDetailPage({ params }: Props) {
     }
   }
 
-  return (
-    <div className='flex flex-col'>
-      <div>ID phòng: {params.id}</div>
-      <div>Mã phòng: {room?.roomCode}</div>
+  const handleReady = async () => {
+    try {
+      if (!room || !user || isReady === undefined) {
+        return
+      }
 
-      <div className='mt-4'>
-        <Button disabled={isLeavingRoom} onClick={handleLeaveRoom}>
-          Rời phòng {isLeavingRoom && <Loader />}
-        </Button>
+      await toggleReady({ userId: user.id, roomId: room.id, isReady })
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  return (
+    <div className='mt-8 flex flex-col'>
+      <div className='flex justify-between gap-6'>
+        <div>
+          <div>ID phòng: {params.id}</div>
+          <div>Mã phòng: {room?.roomCode}</div>
+        </div>
+
+        <div className='flex gap-3'>
+          <Button disabled={isLeavingRoom} onClick={handleReady}>
+            {!isReady ? 'Sẵn sàng' : 'Hủy sẵn sàng'} {isLeavingRoom && <Loader />}
+          </Button>
+          {!isReady && (
+            <Button disabled={isLeavingRoom} onClick={handleLeaveRoom} variant='secondary'>
+              Rời phòng {isLeavingRoom && <Loader />}
+            </Button>
+          )}
+        </div>
+      </div>
+
+      <div className='mt-8 flex flex-col gap-4'>
+        {players?.map((p) => {
+          return (
+            <div key={p.userId}>
+              {p.user && (
+                <div className='flex items-center gap-2'>
+                  <Image src={p.user.picture} alt='player avatar' width={20} height={20} className='rounded-full' />
+                  <div className='font-medium'>{p.user.username}</div>
+                  {room?.readyPlayers.includes(p.userId) && (
+                    <div className='font-medium text-green-500'>Đã sẵn sàng</div>
+                  )}
+                </div>
+              )}
+            </div>
+          )
+        })}
       </div>
     </div>
   )

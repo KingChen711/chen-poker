@@ -71,6 +71,22 @@ function Home() {
           description: 'Hãy tham gia hoặc tạo phòng mới'
         })
       }
+      // @ts-ignore
+      if (error.message === 'You are already in a room!') {
+        toast({
+          variant: 'destructive',
+          title: 'Bạn đang ở trong một phòng khác!',
+          description: 'Hãy vào phòng hiện tại đó, và rời khỏi phòng nếu bạn muốn tạo phòng mới'
+        })
+      }
+      // @ts-ignore
+      if (error.message === 'Not found room!') {
+        toast({
+          variant: 'destructive',
+          title: 'Không tìm thấy phòng!',
+          description: 'Hãy kiểm tra lại mã phòng của bạn'
+        })
+      }
     }
   }
 

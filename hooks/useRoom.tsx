@@ -2,10 +2,13 @@ import { db } from '@/firebase'
 import { Hand, Player, Room, User } from '@/types'
 import { collection, doc, getDocs, onSnapshot, query, where } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
+import { useCurrentUser } from './useCurrentUser'
 
 export function useRoom(roomId: string) {
   const [room, setRoom] = useState<Room | null>(null)
   const [players, setPlayers] = useState<Player[]>([])
+  const user = useCurrentUser()
+  const isReady = user ? room?.readyPlayers.includes(user.id) : false
 
   useEffect(() => {
     if (typeof roomId !== 'string') return
@@ -39,5 +42,5 @@ export function useRoom(roomId: string) {
     fetchPlayers()
   }, [room])
 
-  return { room, players }
+  return { room, players, isReady }
 }
