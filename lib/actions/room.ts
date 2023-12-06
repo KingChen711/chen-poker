@@ -3,6 +3,8 @@ import { drawCard, generateRoomCode } from '../utils'
 import { Room, User } from '@/types'
 import { getUserById, updateUser } from './user'
 import { BalanceValue, BigHouseValue, SmallHouseValue, deck } from '@/constants/deck'
+import { assignRankHand } from '../poker/assign-rank-hand'
+import { compareHand } from '../poker/compare'
 
 type CreateRoomParams = {
   userId: string // room owner
@@ -439,10 +441,20 @@ export async function toShowDown({ roomId }: { roomId: string }) {
   }
 
   room.status = 'showdown'
-
-  // set hand to determine who win first, the correct hand will be assigned later
   room.players = room.players?.map((p) => {
-    p.hand.handCards = [...p.hand.handCards, ...room.boardCards!]
+    p.hand = assignRankHand(p.hand, room.boardCards!)
+    p.bet = 0
     return p
   })
+
+  const winners = [...room.players!].sort((p1, p2) => {
+    return compareHand(p1.hand, p2.hand)
+  })
+
+  console.log({ winners })
+
+  room.checkingPlayers = []
+  room.winner = winners[0].userId
+
+  await updateData({ collectionName: 'rooms', data: room })
 }

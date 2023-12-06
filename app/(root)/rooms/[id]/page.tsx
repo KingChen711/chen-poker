@@ -108,6 +108,7 @@ function RoomDetailPage({ params }: Props) {
         <div>
           <div>ID phòng: {params.id}</div>
           <div>Mã phòng: {room?.roomCode}</div>
+          {room?.winner && <div>Winner: {room.winner}</div>}
         </div>
 
         <div className='flex gap-3'>
