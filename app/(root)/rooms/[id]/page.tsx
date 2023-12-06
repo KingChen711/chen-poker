@@ -17,7 +17,7 @@ import { CardImage } from '@/constants/deck'
 import { useCurrentUser } from '@/hooks/useCurrentUser'
 import { useRoom } from '@/hooks/useRoom'
 import { callBet, checkBet, leaveRoom, raiseBet, startGame } from '@/lib/actions/room'
-import { cn, getCardImage } from '@/lib/utils'
+import { cn, getCardImage, isWinnerCard } from '@/lib/utils'
 import { CardSuit, CardValue } from '@/types'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
@@ -31,7 +31,7 @@ type Props = {
 
 function RoomDetailPage({ params }: Props) {
   const router = useRouter()
-  const { room, players, playingPerson, pot, currentUser } = useRoom(params.id)
+  const { room, players, playingPerson, pot, currentUser, winner } = useRoom(params.id)
   const [isLeavingRoom, setIsLeavingRoom] = useState(false)
   const [raiseValue, setRaiseValue] = useState<number | null>(null)
 
@@ -103,12 +103,13 @@ function RoomDetailPage({ params }: Props) {
   }
 
   return (
-    <div className='mt-8 flex flex-col'>
+    <div className='relative mt-8 flex flex-col'>
+      <div className='fixed inset-0 z-10 bg-black/60'></div>
       <div className='flex justify-between gap-6'>
         <div>
           <div>ID phòng: {params.id}</div>
           <div>Mã phòng: {room?.roomCode}</div>
-          {room?.winner && <div>Winner: {room.winner}</div>}
+          {winner && <div>Winner: {winner.user.username}</div>}
         </div>
 
         <div className='flex gap-3'>
@@ -149,18 +150,20 @@ function RoomDetailPage({ params }: Props) {
                   </div>
 
                   <div className='flex gap-2'>
-                    {currentUser?.userId === p.userId ? (
+                    {currentUser?.userId === p.userId || winner ? (
                       <>
                         <Image
                           src={getCardImage(p.hand.handCards[0]) || ''}
                           alt='first card'
                           width={120}
+                          className={cn(winner && isWinnerCard(winner, p.hand.handCards[0]) && 'z-20')}
                           height={175}
                         />
                         <Image
                           src={getCardImage(p.hand.handCards[1]) || ''}
                           alt='second card'
                           width={120}
+                          className={cn(winner && isWinnerCard(winner, p.hand.handCards[1]) && 'z-20')}
                           height={175}
                         />
                       </>
@@ -196,7 +199,7 @@ function RoomDetailPage({ params }: Props) {
             return (
               <Image
                 key={`${card.suit}-${card.value}`}
-                className='col-span-1'
+                className={cn('col-span-1', winner && isWinnerCard(winner, card) && 'z-20')}
                 src={getCardImage(card) || ''}
                 alt='first card'
                 width={120}

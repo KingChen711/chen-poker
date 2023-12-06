@@ -309,9 +309,12 @@ export async function checkBet({ roomId, userId }: CallBetParams) {
   // handle case end of rouse
   const conditionEndRound =
     (room.checkingPlayers?.length || 0) + (room.foldPlayers?.length || 0) === room.players?.length
+
   if (!conditionEndRound) {
+    console.log('wtf1')
     return
   }
+  console.log('wtf2')
 
   if (room.status === 'the-flop') {
     await toTheTurn({ roomId: room.id })
@@ -434,15 +437,19 @@ export async function toTheRiver({ roomId }: { roomId: string }) {
 }
 
 export async function toShowDown({ roomId }: { roomId: string }) {
+  console.log('Show Down')
+
   const room = await getRoomById(roomId)
 
   if (!room) {
     throw new Error('Not found room')
   }
 
+  let pot = 0
   room.status = 'showdown'
   room.players = room.players?.map((p) => {
     p.hand = assignRankHand(p.hand, room.boardCards!)
+    pot += p.bet
     p.bet = 0
     return p
   })
@@ -455,6 +462,9 @@ export async function toShowDown({ roomId }: { roomId: string }) {
 
   room.checkingPlayers = []
   room.winner = winners[0].userId
+
+  const winner = room.players?.find((p) => p.userId === room.winner)!
+  winner.balance = (winner?.balance || 0) + pot
 
   await updateData({ collectionName: 'rooms', data: room })
 }

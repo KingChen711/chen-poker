@@ -1,5 +1,5 @@
 import { CardImage } from '@/constants/deck'
-import { Card } from '@/types'
+import { Card, Player } from '@/types'
 import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 
@@ -45,4 +45,12 @@ function shuffleDeck(deck: Card[]): Card[] {
 
 export function getCardImage(card: Card) {
   return CardImage.get(JSON.stringify({ value: card.value, suit: card.suit }))
+}
+
+export function isWinnerCard(winner: Player, card: Card) {
+  const winnerCards = winner.hand.pokerCards?.map((card) => {
+    return JSON.stringify({ value: card.value, suit: card.suit })
+  })
+  const checkedCard = JSON.stringify({ value: card.value, suit: card.suit })
+  return winnerCards?.includes(checkedCard)
 }

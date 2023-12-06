@@ -1,4 +1,4 @@
-import { CardValueToBigInt } from '@/constants'
+import { CardValueToBigInt } from '@/constants/deck'
 import { CardValue, Hand } from '@/types'
 
 export function handToFirstBitField(hand: Hand) {

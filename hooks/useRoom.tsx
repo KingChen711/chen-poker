@@ -11,6 +11,13 @@ export function useRoom(roomId: string) {
   const [pot, setPot] = useState(0)
   const user = useCurrentUser()
   const [currentUser, setCurrentUser] = useState<Player | null>(null)
+  const [winner, setWinner] = useState<Player | null>(null)
+
+  useEffect(() => {
+    if (room?.winner) {
+      setWinner(players.find((p) => p.userId === room.winner) || null)
+    }
+  }, [room, players])
 
   useEffect(() => {
     const currentUser = players.find((p) => p.userId === user?.id)
@@ -65,5 +72,5 @@ export function useRoom(roomId: string) {
     fetchPlayers()
   }, [room])
 
-  return { room, players, playingPerson, pot, currentUser }
+  return { room, players, playingPerson, pot, currentUser, winner }
 }
