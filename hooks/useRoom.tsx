@@ -27,7 +27,7 @@ export function useRoom(roomId: string) {
   }, [players, user])
 
   useEffect(() => {
-    if (!room) {
+    if (!room || !room.inGame) {
       return
     }
     const index = room.turn % room?.players.length

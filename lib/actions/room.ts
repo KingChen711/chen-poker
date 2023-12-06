@@ -102,7 +102,6 @@ type JoinRoomParams = { userId: string; roomCode: string }
 
 export async function joinRoom({ userId, roomCode }: JoinRoomParams) {
   const user = (await getUserById(userId)) as User
-  console.log('join room')
 
   if (!user) {
     throw new Error('Not found user!')
@@ -314,10 +313,8 @@ export async function checkBet({ roomId, userId }: CallBetParams) {
     (room.checkingPlayers?.length || 0) + (room.foldPlayers?.length || 0) === room.players?.length
 
   if (!conditionEndRound) {
-    console.log('wtf1')
     return
   }
-  console.log('wtf2')
 
   if (room.status === 'the-flop') {
     await toTheTurn({ roomId: room.id })
@@ -440,8 +437,6 @@ export async function toTheRiver({ roomId }: { roomId: string }) {
 }
 
 export async function toShowDown({ roomId }: { roomId: string }) {
-  console.log('Show Down')
-
   const room = await getRoomById(roomId)
 
   if (!room) {
@@ -463,8 +458,6 @@ export async function toShowDown({ roomId }: { roomId: string }) {
   const winners = [...room.players!].sort((p1, p2) => {
     return compareHand(p1.hand, p2.hand)
   })
-
-  console.log({ winners })
 
   room.checkingPlayers = []
   room.winner = winners[0].userId
@@ -488,11 +481,8 @@ export async function readyNextMatch({ roomId, userId }: CallBetParams) {
   await updateData({ collectionName: 'rooms', data: room })
 
   if (room.readyPlayers.length !== room.players?.length) {
-    console.log('room1')
-
     return
   }
-  console.log('room2')
 
   await toNextMatch({ roomId: room.id })
 }
@@ -574,10 +564,8 @@ export async function foldBet({ roomId, userId }: CallBetParams) {
     (room.checkingPlayers?.length || 0) + (room.foldPlayers?.length || 0) === room.players?.length
 
   if (!conditionEndRound) {
-    console.log('wtf1')
     return
   }
-  console.log('wtf2')
 
   if (room.status === 'the-flop') {
     await toTheTurn({ roomId: room.id })

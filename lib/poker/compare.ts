@@ -27,8 +27,6 @@ export function compareHand(hand1: Hand, hand2: Hand) {
   const pokerCards1 = hand1.pokerCards as Card[]
   const pokerCards2 = hand2.pokerCards as Card[]
 
-  //   console.log({ pokerCards1, pokerCards2 })
-
   for (let i = 0; i < 5; ++i) {
     if (pokerCards1[i] !== pokerCards2[i]) {
       return compareCard(pokerCards1[i], pokerCards2[i])
