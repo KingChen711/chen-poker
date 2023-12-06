@@ -2,11 +2,21 @@
 
 import Loader from '@/components/shared/Loader'
 import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
 import { toast } from '@/components/ui/use-toast'
 import { CardImage } from '@/constants/deck'
 import { useCurrentUser } from '@/hooks/useCurrentUser'
 import { useRoom } from '@/hooks/useRoom'
-import { callBet, checkBet, leaveRoom, startGame } from '@/lib/actions/room'
+import { callBet, checkBet, leaveRoom, raiseBet, startGame } from '@/lib/actions/room'
 import { cn, getCardImage } from '@/lib/utils'
 import { CardSuit, CardValue } from '@/types'
 import Image from 'next/image'
@@ -23,6 +33,7 @@ function RoomDetailPage({ params }: Props) {
   const router = useRouter()
   const { room, players, playingPerson, pot, currentUser } = useRoom(params.id)
   const [isLeavingRoom, setIsLeavingRoom] = useState(false)
+  const [raiseValue, setRaiseValue] = useState<number | null>(null)
 
   const handleLeaveRoom = async () => {
     setIsLeavingRoom(true)
@@ -75,6 +86,17 @@ function RoomDetailPage({ params }: Props) {
         return
       }
       await checkBet({ roomId: room.id, userId: currentUser.userId })
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  const handleRaise = async () => {
+    try {
+      if (!room || !currentUser || !raiseValue) {
+        return
+      }
+      await raiseBet({ roomId: room.id, userId: currentUser.userId, raiseValue })
     } catch (error) {
       console.log(error)
     }
@@ -192,7 +214,55 @@ function RoomDetailPage({ params }: Props) {
           <div className='flex items-center justify-center gap-4'>
             {(currentUser?.bet || 0) < (room?.checkValue || 0) && <Button onClick={handleCall}>Theo cược</Button>}
             {(currentUser?.bet || 0) === (room?.checkValue || 0) && <Button onClick={handleCheck}>Check</Button>}
-            <Button>Cược thêm</Button>
+            <Dialog>
+              <DialogTrigger>
+                <Button>Cược thêm</Button>
+              </DialogTrigger>
+              <DialogContent className='w-[400px]'>
+                <DialogHeader>
+                  <DialogTitle>Cược thêm</DialogTitle>
+                  <DialogDescription>
+                    <div className='flex items-center gap-1 font-medium'>
+                      Tài khoản của bạn: <div className='text-lg text-primary'>{currentUser.balance}$</div>
+                    </div>
+                    <div className='flex items-center gap-1 font-medium'>
+                      Số tiền cần bỏ thêm:{' '}
+                      <div className='text-lg text-primary'>
+                        {(room?.checkValue || 0) - currentUser.bet + (raiseValue || 0)}$
+                      </div>
+                    </div>
+
+                    <Input
+                      onChange={(e) => {
+                        const value = Number(e.target.value)
+                        if (!isNaN(value)) {
+                          setRaiseValue(value)
+                        }
+                      }}
+                      value={raiseValue || ''}
+                      type='number'
+                      placeholder='Nhập số tiền cược thêm'
+                      className='mt-2'
+                    />
+
+                    <div className='flex justify-end gap-3'>
+                      <DialogClose asChild>
+                        <Button className='mt-4' variant='secondary'>
+                          Thôi
+                        </Button>
+                      </DialogClose>
+                      <Button
+                        onClick={handleRaise}
+                        disabled={(room?.checkValue || 0) - currentUser.bet + (raiseValue || 0) > currentUser.balance}
+                        className='mt-4'
+                      >
+                        Cược
+                      </Button>
+                    </div>
+                  </DialogDescription>
+                </DialogHeader>
+              </DialogContent>
+            </Dialog>
             <Button>Bỏ bài</Button>
           </div>
         </div>
