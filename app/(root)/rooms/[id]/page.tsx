@@ -71,7 +71,7 @@ function RoomDetailPage({ params }: Props) {
   }
 
   return (
-    <div className='relative mt-3 flex flex-col'>
+    <div className='flex min-h-screen flex-col pt-24'>
       <div className='flex justify-between gap-6'>
         <div>
           <div className='text-xl font-medium'>Mã phòng: {room?.roomCode}</div>

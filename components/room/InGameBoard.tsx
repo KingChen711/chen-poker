@@ -1,5 +1,5 @@
 import { useRoom } from '@/hooks/useRoom'
-import { cn, getCardImage, isWinnerCard } from '@/lib/utils'
+import { cn, getCardImage, getPlayerPosition, isWinnerCard } from '@/lib/utils'
 import Image from 'next/image'
 import React, { useState } from 'react'
 import {
@@ -16,8 +16,8 @@ import { Input } from '../ui/input'
 import { callBet, checkBet, foldBet, raiseBet, readyNextMatch } from '@/lib/actions/room'
 import { Player, Room } from '@/types'
 import { CardRank } from '@/constants/deck'
-import HoleCard from '../HoleCard'
-import { positionPlayer } from '@/constants'
+import HoleCard from './HoleCard'
+import PlayerBox from './PlayerBox'
 
 type Props = {
   room: Room
@@ -86,7 +86,12 @@ function InGameBoard({ room, currentUser, players, playingPerson, pot, winner }:
     }
   }
   return (
-    <>
+    <div
+      style={{
+        containerType: 'size'
+      }}
+      className='relative aspect-[22/9] w-full min-w-[600px] rounded-[50%]'
+    >
       {winner && room?.readyPlayers?.includes(currentUser?.userId || '') && (
         <div className='text-center text-xl font-medium'>Đang chờ người chơi khác tiếp tục...</div>
       )}
@@ -106,54 +111,45 @@ function InGameBoard({ room, currentUser, players, playingPerson, pot, winner }:
       )}
 
       {players?.map((p, index) => {
+        const { x, y } = getPlayerPosition(index + 1, players.length + 1)
         return (
-          <div
+          <PlayerBox
+            showStand={p.userId === playingPerson}
+            posX={x}
+            posY={y}
             key={p.userId}
-            className={cn('absolute flex w-[20%] aspect-square flex-col border', positionPlayer[String(index)])}
-          >
-            {/* <div className='absolute z-[4] flex items-center gap-2'>
-              <Image src={p.user.picture} alt='player avatar' width={32} height={32} className='rounded-full' />
-              <div className='font-medium'>
-                {p.user.username}
-                {room?.roomOwner === p.userId && '(chủ phòng)'}
-              </div>
-            </div> */}
-
-            <div className='absolute bottom-0 z-[3] flex flex-col gap-4'>
-              <div className='rounded-md border-2 border-muted bg-primary text-[1.2cqw] font-medium'>${p.bet}</div>
-              <div className='text-lg text-primary'>${p.balance}</div>
-            </div>
-
-            <HoleCard
-              className='absolute'
-              winner={winner || undefined}
-              firstCard={p.hand.handCards[0]}
-              secondCard={p.hand.handCards[1]}
-              hidden={currentUser?.userId !== p.userId && !winner}
-            />
-          </div>
+            currentUser={currentUser}
+            player={p}
+            winner={winner}
+          />
         )
       })}
 
       {room?.boardCards && room.boardCards.length > 0 && (
-        <div className='mx-auto mt-8 grid w-fit grid-cols-5 gap-4 rounded-md border-2 p-6'>
+        <div className='absolute left-1/2 top-1/2 flex w-[45%] -translate-x-1/2 -translate-y-1/2 border-4'>
           {room?.boardCards.map((card) => {
             return (
-              <Image
-                key={`${card.suit}-${card.value}`}
-                className={cn('col-span-1', winner && isWinnerCard(winner, card) && 'z-20')}
-                src={getCardImage(card) || ''}
-                alt='first card'
-                width={120}
-                height={175}
-              />
+              <div key={`${card.suit}-${card.value}`} className='relative z-[1] aspect-[0.6857] w-[20%]'>
+                <Image
+                  fill
+                  src={getCardImage(card) || ''}
+                  alt='board card'
+                  className={cn(winner && isWinnerCard(winner, card) && 'z-20')}
+                />
+              </div>
             )
           })}
         </div>
       )}
 
       {playingPerson === currentUser?.userId && !winner && (
-        <div className='mt-8 flex flex-col items-center gap-4'>
+        <div
+          style={{
+            left: '50%',
+            top: '0%'
+          }}
+          className='absolute mt-[3%] flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-4'
+        >
           <div className='flex items-center gap-1 font-medium'>
             Tổng tiền cược: <div className='text-2xl font-bold text-primary'>{pot}$</div>
           </div>
@@ -213,7 +209,7 @@ function InGameBoard({ room, currentUser, players, playingPerson, pot, winner }:
           </div>
         </div>
       )}
-    </>
+    </div>
   )
 }
 

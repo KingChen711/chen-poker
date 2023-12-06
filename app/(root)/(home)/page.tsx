@@ -91,7 +91,7 @@ function Home() {
   }
 
   return (
-    <main className='mt-8 grid grid-cols-12'>
+    <main className='mt-8 grid min-h-screen grid-cols-12 pt-24'>
       <div className='col-span-6'>
         <div className='mb-4 flex gap-4'>
           <Button onClick={handleJoinCurrentRoom}>Vào phòng hiện tại của bạn</Button>

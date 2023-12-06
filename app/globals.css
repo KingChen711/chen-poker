@@ -73,3 +73,30 @@
 .cl-internal-b3fm6y {
   background: linear-gradient(129deg, #e11d48 0%, #f05476 100%) !important;
 }
+
+.stand-player {
+  position: absolute;
+  left: 50%;
+  top: 60%;
+  height: 50%;
+  width: 100%;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: repeating-conic-gradient(from var(--a), #e11d48 0deg 10deg, transparent 10deg 20deg);
+  animation: animate 6s linear infinite;
+}
+
+@property --a {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes animate {
+  0% {
+    --a: 0deg;
+  }
+  100% {
+    --a: 360deg;
+  }
+}

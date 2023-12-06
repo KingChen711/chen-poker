@@ -54,3 +54,12 @@ export function isWinnerCard(winner: Player, card: Card) {
   const checkedCard = JSON.stringify({ value: card.value, suit: card.suit })
   return winnerCards?.includes(checkedCard)
 }
+
+export function getPlayerPosition(index: number, amountOfPlayers: number) {
+  const angle = Math.PI * (1 / 2 - (2 * index) / amountOfPlayers)
+
+  const x = 0.5 * (Math.cos(angle) + 1) * 100
+  const y = 0.5 * (1 - Math.sin(angle)) * 100
+
+  return { x, y }
+}
