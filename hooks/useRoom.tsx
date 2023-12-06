@@ -1,5 +1,5 @@
 import { db } from '@/firebase'
-import { Hand, Player, Room, User } from '@/types'
+import { Player, Room, User } from '@/types'
 import { collection, doc, getDocs, onSnapshot, query, where } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
 import { useCurrentUser } from './useCurrentUser'
@@ -7,8 +7,31 @@ import { useCurrentUser } from './useCurrentUser'
 export function useRoom(roomId: string) {
   const [room, setRoom] = useState<Room | null>(null)
   const [players, setPlayers] = useState<Player[]>([])
+  const [playingPerson, setPlayingPerson] = useState<string | null>(null)
+  const [pot, setPot] = useState(0)
   const user = useCurrentUser()
-  const isReady = user ? room?.readyPlayers.includes(user.id) : false
+  const [currentUser, setCurrentUser] = useState<Player | null>(null)
+
+  useEffect(() => {
+    const currentUser = players.find((p) => p.userId === user?.id)
+    setCurrentUser(currentUser || null)
+  }, [players, user])
+
+  useEffect(() => {
+    if (!room) {
+      return
+    }
+    const index = room.turn % room?.players.length
+    setPlayingPerson(room.players[index].userId)
+  }, [room])
+
+  useEffect(() => {
+    let pot = 0
+    players.forEach((p) => {
+      pot += p.bet
+    })
+    setPot(pot)
+  }, [players])
 
   useEffect(() => {
     if (typeof roomId !== 'string') return
@@ -42,5 +65,5 @@ export function useRoom(roomId: string) {
     fetchPlayers()
   }, [room])
 
-  return { room, players, isReady }
+  return { room, players, playingPerson, pot, currentUser }
 }

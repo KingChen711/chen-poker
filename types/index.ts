@@ -54,12 +54,13 @@ export type Hand = { handCards: Card[]; rank?: Rank; pokerCards?: Card[] }
 // just use in room
 export type Player = {
   userId: string
-  user?: User
+  user: User
   hand: Hand
   balance: number // init 10000
+  bet: number
 }
 
-// small value =100, big value =200
+// small value = 100, big value = 200
 
 export type Room = {
   id: string
@@ -68,10 +69,15 @@ export type Room = {
   players: Player[]
   inGame: boolean
 
+  turn: number
+  checkValue: number
+  dealerIndex: number
+  deck: Card[]
   dealer: string // user id
   smallHouse: string // user id
   bigHouse: string // user id
-  readyPlayers: string[] // user id
   foldPlayers: string[] // user id
   boardCards: Card[]
+  checkingPlayers: string[]
+  status: 'pre-flop' | 'the-flop' | 'the-turn' | 'the-river' | 'showdown'
 }

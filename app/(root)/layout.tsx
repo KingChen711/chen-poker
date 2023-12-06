@@ -8,7 +8,7 @@ type Props = {
 
 const Layout = async ({ children }: Props) => {
   return (
-    <main className='relative'>
+    <main className='relative pb-12'>
       <Header />
       <div className='mx-auto w-11/12 max-w-7xl'>{children}</div>
       <Toaster />

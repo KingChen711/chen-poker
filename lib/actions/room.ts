@@ -1,7 +1,8 @@
 import { addData, deleteData, getById, readData, updateData } from '@/firebase/services'
-import { generateRoomCode } from '../utils'
+import { drawCard, generateRoomCode } from '../utils'
 import { Room, User } from '@/types'
 import { getUserById, updateUser } from './user'
+import { BalanceValue, BigHouseValue, SmallHouseValue, deck } from '@/constants/deck'
 
 type CreateRoomParams = {
   userId: string // room owner
@@ -27,7 +28,6 @@ export async function createRoom({ userId }: CreateRoomParams) {
       dealer: null,
       smallHouse: null,
       bigHouse: null,
-      readyPlayers: [],
       foldedPlayers: [],
       boardCards: []
     }
@@ -82,7 +82,6 @@ export async function leaveRoom({ userId }: LeaveRoomParams) {
     return
   }
 
-  room.readyPlayers = room.readyPlayers?.filter((p) => p !== userId)
   if (room.roomOwner === userId) {
     // need to change roomOwner
     room.roomOwner = room.players?.[0].userId
@@ -138,36 +137,198 @@ export async function joinRoom({ userId, roomCode }: JoinRoomParams) {
   return room.id
 }
 
-type toggleReadyParams = { userId: string; roomId: string; isReady: boolean }
-
-export async function toggleReady({ userId, roomId, isReady }: toggleReadyParams) {
-  try {
-    const user = (await getUserById(userId)) as User
-
-    if (!user) {
-      throw new Error('Not found user!')
-    }
-
-    const room = await getRoomById(roomId)
-
-    if (!room) {
-      throw new Error('Not found room!')
-    }
-
-    if (isReady) {
-      room.readyPlayers = room.readyPlayers?.filter((p) => p !== userId)
-    } else {
-      room.readyPlayers?.push(userId)
-    }
-    await updateData({ collectionName: 'rooms', data: room })
-
-    return room.id
-  } catch (error) {
-    console.log(error)
-  }
-}
-
 export async function getRoomById(roomId: string) {
   const room = (await getById({ collectionName: 'rooms', id: roomId })) as Room | null
   return { ...room, id: roomId }
+}
+
+type CallBetParams = { roomId: string; userId: string }
+
+export async function callBet({ roomId, userId }: CallBetParams) {
+  const room = await getRoomById(roomId)
+  const user = await getUserById(userId)
+
+  if (!room || !user) {
+    throw new Error('Not found user or room')
+  }
+
+  const player = room.players?.find((p) => p.userId === user.id)!
+
+  const diffBet = (room?.checkValue || 0) - player.bet
+  player.balance -= diffBet
+  player.bet = room?.checkValue || 0
+
+  let turnInCreaseAmount = 1
+  while (1) {
+    const nextPlayer = room.players?.find((p, index) => {
+      return index === (room.turn! + turnInCreaseAmount) % room.players!.length
+    })?.userId
+
+    if (nextPlayer && room.foldPlayers?.includes(nextPlayer)) {
+      turnInCreaseAmount++
+      continue
+    }
+
+    break
+  }
+
+  room.turn = (room?.turn || 0) + turnInCreaseAmount
+  await updateData({ collectionName: 'rooms', data: room })
+
+  // handle case end of rouse
+  const unCallPlayer = room.players?.find((p) => p.bet < (room.checkValue || 0))
+  if (unCallPlayer) {
+    return
+  }
+
+  // need to go to next round
+  if (room.status === 'pre-flop') {
+    await toTheFlop({ roomId: room.id })
+  }
+}
+
+export async function toTheFlop({ roomId }: { roomId: string }) {
+  const room = await getRoomById(roomId)
+
+  if (!room) {
+    throw new Error('Not found room')
+  }
+
+  room.turn = room.dealerIndex! + 1
+  let turnInCreaseAmount = 0
+  while (1) {
+    const nextPlayer = room.players?.find((p, index) => {
+      return index === (room.turn! + turnInCreaseAmount) % room.players!.length
+    })?.userId
+
+    if (nextPlayer && room.foldPlayers?.includes(nextPlayer)) {
+      turnInCreaseAmount++
+      continue
+    }
+
+    break
+  }
+
+  if (turnInCreaseAmount > 0) {
+    room.turn = (room.turn || 0) + turnInCreaseAmount
+  }
+
+  room.checkingPlayers = []
+  room.status = 'the-flop'
+  room.boardCards = drawCard(room.deck!, 3)
+  await updateData({ collectionName: 'rooms', data: room })
+}
+
+type StartGameParams = {
+  roomId: string
+}
+
+export async function startGame({ roomId }: StartGameParams) {
+  const room = await getRoomById(roomId)
+
+  if (!room) {
+    throw new Error('Not found room!')
+  }
+
+  if (room.players!.length < 3) {
+    throw new Error('At least 3 players to start a game!')
+  }
+
+  room.status = 'pre-flop'
+  room.checkValue = 200
+  room.turn = 3 // turn of the player next to the big house
+  room.dealer = room.players?.[0].userId
+  room.smallHouse = room.players?.[1].userId
+  room.bigHouse = room.players?.[2].userId
+  room.dealerIndex = 0
+  room.inGame = true
+  room.deck = [...deck]
+  room.players?.forEach((p) => {
+    p.hand = { handCards: drawCard(room.deck!, 2) }
+    if (p.userId === room.smallHouse) {
+      p.balance = BalanceValue - SmallHouseValue
+      p.bet = SmallHouseValue
+      return
+    }
+    if (p.userId === room.bigHouse) {
+      p.balance = BalanceValue - BigHouseValue
+      p.bet = BigHouseValue
+      return
+    }
+    p.balance = BalanceValue
+    p.bet = 0
+  })
+
+  await updateData({ collectionName: 'rooms', data: room })
+}
+
+export async function checkBet({ roomId, userId }: CallBetParams) {
+  const room = await getRoomById(roomId)
+  const user = await getUserById(userId)
+
+  if (!room || !user) {
+    throw new Error('Not found user or room')
+  }
+
+  room.checkingPlayers?.push(userId)
+
+  let turnInCreaseAmount = 1
+  while (1) {
+    const nextPlayer = room.players?.find((p, index) => {
+      return index === (room.turn! + turnInCreaseAmount) % room.players!.length
+    })?.userId
+
+    if (nextPlayer && room.foldPlayers?.includes(nextPlayer)) {
+      turnInCreaseAmount++
+      continue
+    }
+
+    break
+  }
+
+  room.turn = (room?.turn || 0) + turnInCreaseAmount
+  await updateData({ collectionName: 'rooms', data: room })
+
+  // handle case end of rouse
+  const conditionEndRound =
+    (room.checkingPlayers?.length || 0) + (room.foldPlayers?.length || 0) === room.players?.length
+  if (!conditionEndRound) {
+    return
+  }
+
+  if (room.status === 'the-flop') {
+    await toTheTurn({ roomId: room.id })
+  }
+}
+
+export async function toTheTurn({ roomId }: { roomId: string }) {
+  const room = await getRoomById(roomId)
+
+  if (!room) {
+    throw new Error('Not found room')
+  }
+
+  room.turn = room.dealerIndex! + 1
+  let turnInCreaseAmount = 0
+  while (1) {
+    const nextPlayer = room.players?.find((p, index) => {
+      return index === (room.turn! + turnInCreaseAmount) % room.players!.length
+    })?.userId
+
+    if (nextPlayer && room.foldPlayers?.includes(nextPlayer)) {
+      turnInCreaseAmount++
+      continue
+    }
+
+    break
+  }
+
+  if (turnInCreaseAmount > 0) {
+    room.turn = (room.turn || 0) + turnInCreaseAmount
+  }
+
+  room.checkingPlayers = []
+  room.status = 'the-turn'
+  room.boardCards = [...room.boardCards!, ...drawCard(room.deck!, 1)]
+  await updateData({ collectionName: 'rooms', data: room })
 }
