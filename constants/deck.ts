@@ -1,4 +1,4 @@
-import { Card, CardSuit, CardValue } from '@/types'
+import { Card, CardSuit, CardValue, Rank } from '@/types'
 
 export const CardValueToBigInt = new Map<CardValue, bigint>([
   [CardValue.Two, BigInt(2)],
@@ -129,3 +129,19 @@ export const CardImage: Map<string, string> = new Map<string, string>([
 export const SmallHouseValue = 100
 export const BigHouseValue = 200
 export const BalanceValue = 10000
+
+// @ts-ignore
+type TCardRank = { [key: any]: string }
+
+export const CardRank: Map<Rank, string> = new Map([
+  [Rank.HighCard, 'Mậu Thầu'],
+  [Rank.OnePair, 'Một Đôi'],
+  [Rank.TwoPair, 'Hai Đôi'],
+  [Rank.ThreeOfKind, 'Sám'],
+  [Rank.Straight, 'Sảnh'],
+  [Rank.Flush, 'Thùng'],
+  [Rank.FullHouse, 'Cù Lũ'],
+  [Rank.FourOfKind, 'Tứ Quý'],
+  [Rank.StraightFlush, 'Sảnh Thùng'],
+  [Rank.RoyalFlush, 'Thùng Phá Sảnh']
+])

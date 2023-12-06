@@ -26,6 +26,7 @@ export type Card = {
 }
 
 export enum Rank {
+  Fold = -1,
   HighCard,
   OnePair,
   TwoPair,
@@ -79,6 +80,7 @@ export type Room = {
   foldPlayers: string[] // user id
   boardCards: Card[]
   checkingPlayers: string[]
-  winner: string // user id
+  readyPlayers: string[] // ready for next match not to start game
+  winner: string | null // user id
   status: 'pre-flop' | 'the-flop' | 'the-turn' | 'the-river' | 'showdown'
 }

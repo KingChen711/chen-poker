@@ -16,6 +16,8 @@ export function useRoom(roomId: string) {
   useEffect(() => {
     if (room?.winner) {
       setWinner(players.find((p) => p.userId === room.winner) || null)
+    } else {
+      setWinner(null)
     }
   }, [room, players])
 

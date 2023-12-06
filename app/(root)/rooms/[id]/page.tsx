@@ -13,10 +13,10 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { toast } from '@/components/ui/use-toast'
-import { CardImage } from '@/constants/deck'
+import { CardImage, CardRank } from '@/constants/deck'
 import { useCurrentUser } from '@/hooks/useCurrentUser'
 import { useRoom } from '@/hooks/useRoom'
-import { callBet, checkBet, leaveRoom, raiseBet, startGame } from '@/lib/actions/room'
+import { callBet, checkBet, foldBet, leaveRoom, raiseBet, readyNextMatch, startGame } from '@/lib/actions/room'
 import { cn, getCardImage, isWinnerCard } from '@/lib/utils'
 import { CardSuit, CardValue } from '@/types'
 import Image from 'next/image'
@@ -102,14 +102,53 @@ function RoomDetailPage({ params }: Props) {
     }
   }
 
+  const handleFold = async () => {
+    try {
+      if (!room || !currentUser) {
+        return
+      }
+      await foldBet({ roomId: room.id, userId: currentUser.userId })
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  const handleReadyNextMatch = async () => {
+    try {
+      if (!room || !currentUser) {
+        return
+      }
+      await readyNextMatch({ roomId: room.id, userId: currentUser.userId })
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  console.log({ winner })
+
   return (
     <div className='relative mt-8 flex flex-col'>
-      <div className='fixed inset-0 z-10 bg-black/60'></div>
+      {winner && room?.readyPlayers?.includes(currentUser?.userId || '') && (
+        <div className='text-center text-xl font-medium'>Đang chờ người chơi khác tiếp tục...</div>
+      )}
+      {winner && !room?.readyPlayers?.includes(currentUser?.userId || '') && (
+        <div className='fixed inset-0 z-10 flex flex-col bg-black/60'>
+          <div className='mt-6 flex items-center justify-center text-3xl font-medium text-white'>
+            Chúc Mừng <p className='ml-3 text-4xl font-bold text-primary'>{winner.user.username}</p>
+          </div>
+          <div className='mt-6 flex items-center justify-center text-3xl font-medium text-white'>
+            Hạng bài: <p className='ml-3 text-4xl font-bold text-primary'>{CardRank.get(winner.hand.rank!)}</p>
+          </div>
+
+          <Button onClick={handleReadyNextMatch} size='lg' className='absolute bottom-4 right-4'>
+            Tiếp tục
+          </Button>
+        </div>
+      )}
       <div className='flex justify-between gap-6'>
         <div>
           <div>ID phòng: {params.id}</div>
           <div>Mã phòng: {room?.roomCode}</div>
-          {winner && <div>Winner: {winner.user.username}</div>}
         </div>
 
         <div className='flex gap-3'>
@@ -128,7 +167,10 @@ function RoomDetailPage({ params }: Props) {
           return (
             <div
               key={p.userId}
-              className={cn('p-4 rounded-md border-2 shadow', playingPerson === p.userId && 'border-primary')}
+              className={cn(
+                'p-4 rounded-md border-2 shadow',
+                playingPerson === p.userId && !winner && 'border-primary'
+              )}
             >
               {p.user && (
                 <div className='flex flex-col'>
@@ -210,7 +252,7 @@ function RoomDetailPage({ params }: Props) {
         </div>
       )}
 
-      {playingPerson === currentUser?.userId && (
+      {playingPerson === currentUser?.userId && !winner && (
         <div className='mt-8 flex flex-col items-center gap-4'>
           <div className='flex items-center gap-1 font-medium'>
             Tổng tiền cược: <div className='text-2xl font-bold text-primary'>{pot}$</div>
@@ -267,7 +309,7 @@ function RoomDetailPage({ params }: Props) {
                 </DialogHeader>
               </DialogContent>
             </Dialog>
-            <Button>Bỏ bài</Button>
+            {(currentUser?.bet || 0) < (room?.checkValue || 0) && <Button onClick={handleFold}>Bỏ bài</Button>}
           </div>
         </div>
       )}

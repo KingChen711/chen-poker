@@ -1,6 +1,6 @@
 import { addData, deleteData, getById, readData, updateData } from '@/firebase/services'
 import { drawCard, generateRoomCode } from '../utils'
-import { Room, User } from '@/types'
+import { Rank, Room, User } from '@/types'
 import { getUserById, updateUser } from './user'
 import { BalanceValue, BigHouseValue, SmallHouseValue, deck } from '@/constants/deck'
 import { assignRankHand } from '../poker/assign-rank-hand'
@@ -30,7 +30,7 @@ export async function createRoom({ userId }: CreateRoomParams) {
       dealer: null,
       smallHouse: null,
       bigHouse: null,
-      foldedPlayers: [],
+      foldPlayers: [],
       boardCards: []
     }
   })
@@ -178,8 +178,10 @@ export async function callBet({ roomId, userId }: CallBetParams) {
   await updateData({ collectionName: 'rooms', data: room })
 
   // handle case end of rouse
-  const unCallPlayer = room.players?.find((p) => p.bet < (room.checkValue || 0))
-  if (unCallPlayer) {
+  const unCallAndNotFoldPlayer = room.players?.find(
+    (p) => p.bet < (room.checkValue || 0) && !room.foldPlayers?.includes(p.userId)
+  )
+  if (unCallAndNotFoldPlayer) {
     return
   }
 
@@ -259,6 +261,7 @@ export async function startGame({ roomId }: StartGameParams) {
   room.bigHouse = room.players?.[2].userId
   room.dealerIndex = 0
   room.inGame = true
+  room.boardCards = []
   room.deck = [...deck]
   room.players?.forEach((p) => {
     p.hand = { handCards: drawCard(room.deck!, 2) }
@@ -449,6 +452,9 @@ export async function toShowDown({ roomId }: { roomId: string }) {
   room.status = 'showdown'
   room.players = room.players?.map((p) => {
     p.hand = assignRankHand(p.hand, room.boardCards!)
+    if (room.foldPlayers?.includes(p.userId)) {
+      p.hand.rank = Rank.Fold
+    }
     pot += p.bet
     p.bet = 0
     return p
@@ -462,6 +468,161 @@ export async function toShowDown({ roomId }: { roomId: string }) {
 
   room.checkingPlayers = []
   room.winner = winners[0].userId
+
+  const winner = room.players?.find((p) => p.userId === room.winner)!
+  winner.balance = (winner?.balance || 0) + pot
+
+  await updateData({ collectionName: 'rooms', data: room })
+}
+
+export async function readyNextMatch({ roomId, userId }: CallBetParams) {
+  const user = await getUserById(userId)
+  const room = await getRoomById(roomId)
+
+  if (!user || !room) {
+    throw new Error('Not found room or user')
+  }
+
+  room.readyPlayers = room.readyPlayers ? [...room.readyPlayers, userId] : [userId]
+
+  await updateData({ collectionName: 'rooms', data: room })
+
+  if (room.readyPlayers.length !== room.players?.length) {
+    console.log('room1')
+
+    return
+  }
+  console.log('room2')
+
+  await toNextMatch({ roomId: room.id })
+}
+
+export async function toNextMatch({ roomId }: { roomId: string }) {
+  const room = await getRoomById(roomId)
+
+  if (!room) {
+    throw new Error('Not found room!')
+  }
+
+  const dealerIndex = room.dealerIndex! + 1
+  const numberOfPlayers = room.players?.length!
+  room.dealerIndex = dealerIndex
+  room.status = 'pre-flop'
+  room.checkValue = 200
+  room.turn = dealerIndex + 3
+  room.dealer = room.players?.[dealerIndex % numberOfPlayers].userId
+  room.smallHouse = room.players?.[(dealerIndex + 1) % numberOfPlayers].userId
+  room.bigHouse = room.players?.[(dealerIndex + 2) % numberOfPlayers].userId
+  room.deck = [...deck]
+  room.foldPlayers = []
+  room.boardCards = []
+  room.checkingPlayers = []
+  room.readyPlayers = []
+  room.winner = null
+  room.players?.forEach((p) => {
+    p.hand = { handCards: drawCard(room.deck!, 2) }
+    if (p.userId === room.smallHouse) {
+      p.balance = p.balance - SmallHouseValue
+      p.bet = SmallHouseValue
+      return
+    }
+    if (p.userId === room.bigHouse) {
+      p.balance = p.balance - BigHouseValue
+      p.bet = BigHouseValue
+      return
+    }
+    p.bet = 0
+  })
+
+  await updateData({ collectionName: 'rooms', data: room })
+}
+
+export async function foldBet({ roomId, userId }: CallBetParams) {
+  const room = await getRoomById(roomId)
+  const user = await getUserById(userId)
+
+  if (!room || !user) {
+    throw new Error('Not found user or room')
+  }
+
+  if (room.players?.length! - room.foldPlayers?.length! === 2) {
+    await showDownFold({ roomId: room.id, lastFoldPlayer: userId })
+    return
+  }
+
+  room.foldPlayers?.push(userId)
+
+  let turnInCreaseAmount = 1
+  while (1) {
+    const nextPlayer = room.players?.find((p, index) => {
+      return index === (room.turn! + turnInCreaseAmount) % room.players!.length
+    })?.userId
+
+    if (nextPlayer && room.foldPlayers?.includes(nextPlayer)) {
+      turnInCreaseAmount++
+      continue
+    }
+
+    break
+  }
+
+  room.turn = (room?.turn || 0) + turnInCreaseAmount
+  await updateData({ collectionName: 'rooms', data: room })
+
+  // handle case end of rouse
+  const conditionEndRound =
+    (room.checkingPlayers?.length || 0) + (room.foldPlayers?.length || 0) === room.players?.length
+
+  if (!conditionEndRound) {
+    console.log('wtf1')
+    return
+  }
+  console.log('wtf2')
+
+  if (room.status === 'the-flop') {
+    await toTheTurn({ roomId: room.id })
+    return
+  }
+
+  if (room.status === 'the-turn') {
+    await toTheRiver({ roomId: room.id })
+    return
+  }
+
+  if (room.status === 'the-river') {
+    await toShowDown({ roomId: room.id })
+  }
+}
+
+type ShowDownFoldParams = {
+  roomId: string
+  lastFoldPlayer: string
+}
+export async function showDownFold({ roomId, lastFoldPlayer }: ShowDownFoldParams) {
+  const room = await getRoomById(roomId)
+
+  if (!room) {
+    throw new Error('Not found room')
+  }
+
+  room.foldPlayers?.push(lastFoldPlayer)
+  room.winner = room.players?.find((p) => !room.foldPlayers?.includes(p.userId))?.userId
+  room.checkingPlayers = []
+  const amountNeedDrawMore = 5 - (room.boardCards?.length || 0)
+  room.boardCards = [...room.boardCards!, ...drawCard(room.deck!, amountNeedDrawMore)]
+
+  let pot = 0
+  room.status = 'showdown'
+  room.players = room.players?.map((p) => {
+    if (p.userId !== room.winner) {
+      p.hand.rank = Rank.Fold
+    } else {
+      p.hand = assignRankHand(p.hand, room.boardCards!)
+    }
+    pot += p.bet
+    p.bet = 0
+    return p
+  })
 
   const winner = room.players?.find((p) => p.userId === room.winner)!
   winner.balance = (winner?.balance || 0) + pot
