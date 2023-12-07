@@ -82,7 +82,7 @@
   transform: translateX(-50%);
   border-radius: 50%;
   background: repeating-conic-gradient(from var(--a), #FACC15 0deg 10deg, transparent 10deg 20deg);
-  animation: animate 6s linear infinite;
+  animation: animate 10s linear infinite;
 }
 
 @property --a {

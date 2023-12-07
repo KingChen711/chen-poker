@@ -6,8 +6,8 @@ import { ModeToggle } from './ModeToggle'
 
 function Header() {
   return (
-    <header className='fixed z-[9] w-full border-b bg-background shadow'>
-      <div className='mx-auto flex w-11/12 max-w-6xl items-center justify-between py-6'>
+    <header className='fixed z-0 w-full border-b bg-background shadow'>
+      <div className='mx-auto flex w-9/12 items-center justify-between py-6'>
         <Link className='flex items-center gap-1' href='/'>
           <Image alt='Chen Poker Logo' src='/assets/images/chip.png' width={26} height={26} />
           <div className='font-spaceGrotesk text-3xl font-bold max-sm:hidden'>

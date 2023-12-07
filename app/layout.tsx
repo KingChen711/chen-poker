@@ -1,7 +1,7 @@
 import { ClerkProvider } from '@clerk/nextjs'
 import React from 'react'
 // eslint-disable-next-line camelcase
-import { Inter, Space_Grotesk } from 'next/font/google'
+import { Inter, Space_Grotesk, Merriweather } from 'next/font/google'
 import type { Metadata } from 'next'
 import './globals.css'
 import { ThemeProvider } from '@/contexts/ThemeProvider'
@@ -17,6 +17,12 @@ const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
   weight: ['300', '400', '500', '600', '700'],
   variable: '--font-spaceGrotesk'
+})
+
+const merriweather = Merriweather({
+  subsets: ['latin'],
+  weight: ['300', '400', '700', '900'],
+  variable: '--font-merriweather'
 })
 
 export const metadata: Metadata = {
@@ -40,7 +46,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       }}
     >
       <html lang='en'>
-        <body className={`${inter.variable} ${spaceGrotesk.variable}`}>
+        <body className={`${inter.variable} ${spaceGrotesk.variable} ${merriweather.variable}`}>
           <ThemeProvider attribute='class' defaultTheme='system' enableSystem disableTransitionOnChange>
             {children}
           </ThemeProvider>

@@ -9,21 +9,24 @@ function HoleCard({ winner, firstCard, secondCard, hidden = false, className }: 
   return (
     <div className={cn('w-full h-full -z-20', className)}>
       <div className='absolute left-1/2 z-[5] aspect-[0.6857] w-[50%] -translate-x-2/3'>
-        <div className='absolute inset-0 z-30 translate-x-[30%] rotate-12 bg-black/60'></div>
+        {winner && <div className='absolute inset-0 z-30 translate-x-[30%] rotate-12 rounded-md bg-black/50'></div>}
         <Image
           fill
           src={hidden ? '/assets/cards/back-card.jpg' : getCardImage(firstCard!) || ''}
           alt='first card'
-          className={cn('absolute translate-x-[30%] rotate-12', winner && isWinnerCard(winner, firstCard!) && 'z-50')}
+          className={cn(
+            'rounded-md absolute translate-x-[30%] rotate-12',
+            winner && isWinnerCard(winner, firstCard!) && 'z-50'
+          )}
         />
       </div>
-      <div className='absolute left-1/2 aspect-[0.6857] w-[50%] -translate-x-2/3'>
-        <div className='absolute inset-0 z-30 -rotate-12 bg-black/60'></div>
+      <div className='absolute left-1/2 aspect-[0.6857] w-[50%] -translate-x-2/3 rounded-md'>
+        {winner && <div className='absolute inset-0 z-30 -rotate-12 bg-black/50'></div>}
         <Image
           fill
           src={hidden ? '/assets/cards/back-card.jpg' : getCardImage(secondCard!) || ''}
           alt='second card'
-          className={cn('absolute -rotate-12', winner && isWinnerCard(winner, secondCard!) && 'z-50')}
+          className={cn('rounded-md absolute -rotate-12', winner && isWinnerCard(winner, secondCard!) && 'z-50')}
         />
       </div>
     </div>

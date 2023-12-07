@@ -135,8 +135,8 @@ type TCardRank = { [key: any]: string }
 
 export const CardRank: Map<Rank, string> = new Map([
   [Rank.HighCard, 'Mậu Thầu'],
-  [Rank.OnePair, 'Một Đôi'],
-  [Rank.TwoPair, 'Hai Đôi'],
+  [Rank.OnePair, '1 Đôi'],
+  [Rank.TwoPair, '2 Đôi'],
   [Rank.ThreeOfKind, 'Sám'],
   [Rank.Straight, 'Sảnh'],
   [Rank.Flush, 'Thùng'],

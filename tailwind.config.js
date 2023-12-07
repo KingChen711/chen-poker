@@ -66,7 +66,8 @@ module.exports = {
       },
       fontFamily: {
         inter: ['var(--font-inter)'],
-        spaceGrotesk: ['var(--font-spaceGrotesk)']
+        spaceGrotesk: ['var(--font-spaceGrotesk)'],
+        merriweather: ['var(--font-merriweather)']
       }
     }
   },

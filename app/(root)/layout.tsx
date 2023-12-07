@@ -10,7 +10,7 @@ const Layout = async ({ children }: Props) => {
   return (
     <main className='relative'>
       <Header />
-      <div className='mx-auto w-10/12 max-w-6xl'>{children}</div>
+      <div className='mx-auto w-9/12'>{children}</div>
       <Toaster />
     </main>
   )
