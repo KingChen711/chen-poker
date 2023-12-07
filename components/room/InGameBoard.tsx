@@ -13,7 +13,7 @@ import {
 } from '../ui/dialog'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
-import { callBet, checkBet, foldBet, raiseBet, readyNextMatch } from '@/lib/actions/room'
+import { allInBet, callBet, checkBet, foldBet, raiseBet, readyNextMatch } from '@/lib/actions/room'
 import { Player, Room } from '@/types'
 import { CardRank } from '@/constants/deck'
 import HoleCard from './HoleCard'
@@ -85,6 +85,17 @@ function InGameBoard({ room, currentUser, players, playingPerson, pot, winner }:
     }
   }
 
+  const handleAllIn = async () => {
+    try {
+      if (!room || !currentUser) {
+        return
+      }
+      await allInBet({ roomId: room.id, userId: currentUser.userId })
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   return (
     <div
       style={{
@@ -104,13 +115,15 @@ function InGameBoard({ room, currentUser, players, playingPerson, pot, winner }:
             {CardRank.get(winner.hand.rank!)}
           </div>
 
-          <Button
-            onClick={handleReadyNextMatch}
-            size='lg'
-            className='absolute bottom-[3%] right-[2%] h-[4.5%] w-[8%] text-[1cqw] font-bold'
-          >
-            Tiếp tục
-          </Button>
+          {players.map((p) => p.userId).includes(currentUser?.userId || '') && (
+            <Button
+              onClick={handleReadyNextMatch}
+              size='lg'
+              className='absolute bottom-[3%] right-[2%] h-[4.5%] w-[8%] text-[1cqw] font-bold'
+            >
+              Tiếp tục
+            </Button>
+          )}
         </div>
       )}
       {players?.map((p, index) => {
@@ -163,11 +176,17 @@ function InGameBoard({ room, currentUser, players, playingPerson, pot, winner }:
         )}
         {playingPerson === currentUser?.userId && !winner && (
           <div className='flex items-center justify-center gap-4'>
-            {(currentUser?.bet || 0) < (room?.checkValue || 0) && <Button onClick={handleCall}>Theo cược</Button>}
+            {(currentUser?.bet || 0) < (room?.checkValue || 0) &&
+              currentUser.balance + (currentUser?.bet || 0) > room.checkValue && (
+                <Button onClick={handleCall}>Theo cược</Button>
+              )}
+            {currentUser.balance + (currentUser?.bet || 0) <= room.checkValue && (
+              <Button onClick={handleAllIn}>All in</Button>
+            )}
             {(currentUser?.bet || 0) === (room?.checkValue || 0) && <Button onClick={handleCheck}>Check</Button>}
             <Dialog>
               <DialogTrigger>
-                <Button>Cược thêm</Button>
+                {currentUser.balance + (currentUser?.bet || 0) > room.checkValue && <Button>Cược thêm</Button>}
               </DialogTrigger>
               <DialogContent className='w-[400px]'>
                 <DialogHeader>

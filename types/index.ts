@@ -80,6 +80,7 @@ export type Room = {
   foldPlayers: string[] // user id
   boardCards: Card[]
   checkingPlayers: string[]
+  allInPlayers: string[]
   readyPlayers: string[] // ready for next match not to start game
   winner: string | null // user id
   status: 'pre-flop' | 'the-flop' | 'the-turn' | 'the-river' | 'showdown'

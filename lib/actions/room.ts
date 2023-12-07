@@ -1,10 +1,12 @@
 import { addData, deleteData, getById, readData, updateData } from '@/firebase/services'
 import { drawCard, generateRoomCode } from '../utils'
-import { Rank, Room, User } from '@/types'
+import { Player, Rank, Room, User } from '@/types'
 import { getUserById, updateUser } from './user'
 import { BalanceValue, BigBlindValue, SmallBlindValue, deck } from '@/constants/deck'
 import { assignRankHand } from '../poker/assign-rank-hand'
 import { compareHand } from '../poker/compare'
+import { collection, getDocs, query, where } from 'firebase/firestore'
+import { db } from '@/firebase'
 
 type CreateRoomParams = {
   userId: string // room owner
@@ -31,6 +33,7 @@ export async function createRoom({ userId }: CreateRoomParams) {
       smallBlind: null,
       bigBlind: null,
       foldPlayers: [],
+      allInPlayers: [],
       boardCards: []
     }
   })
@@ -165,7 +168,7 @@ export async function callBet({ roomId, userId }: CallBetParams) {
       return index === (room.turn! + turnInCreaseAmount) % room.players!.length
     })?.userId
 
-    if (nextPlayer && room.foldPlayers?.includes(nextPlayer)) {
+    if (nextPlayer && (room.foldPlayers?.includes(nextPlayer) || room.allInPlayers?.includes(nextPlayer))) {
       turnInCreaseAmount++
       continue
     }
@@ -178,7 +181,8 @@ export async function callBet({ roomId, userId }: CallBetParams) {
 
   // handle case end of rouse
   const unCallAndNotFoldPlayer = room.players?.find(
-    (p) => p.bet < (room.checkValue || 0) && !room.foldPlayers?.includes(p.userId)
+    (p) =>
+      p.bet < (room.checkValue || 0) && !room.foldPlayers?.includes(p.userId) && !room.allInPlayers?.includes(p.userId)
   )
   if (unCallAndNotFoldPlayer) {
     return
@@ -219,7 +223,7 @@ export async function toTheFlop({ roomId }: { roomId: string }) {
       return index === (room.turn! + turnInCreaseAmount) % room.players!.length
     })?.userId
 
-    if (nextPlayer && room.foldPlayers?.includes(nextPlayer)) {
+    if (nextPlayer && (room.foldPlayers?.includes(nextPlayer) || room.allInPlayers?.includes(nextPlayer))) {
       turnInCreaseAmount++
       continue
     }
@@ -297,7 +301,7 @@ export async function checkBet({ roomId, userId }: CallBetParams) {
       return index === (room.turn! + turnInCreaseAmount) % room.players!.length
     })?.userId
 
-    if (nextPlayer && room.foldPlayers?.includes(nextPlayer)) {
+    if (nextPlayer && (room.foldPlayers?.includes(nextPlayer) || room.allInPlayers?.includes(nextPlayer))) {
       turnInCreaseAmount++
       continue
     }
@@ -310,9 +314,71 @@ export async function checkBet({ roomId, userId }: CallBetParams) {
 
   // handle case end of rouse
   const conditionEndRound =
-    (room.checkingPlayers?.length || 0) + (room.foldPlayers?.length || 0) === room.players?.length
+    (room.checkingPlayers?.length || 0) + (room.foldPlayers?.length || 0) + (room.allInPlayers?.length || 0) ===
+    room.players?.length
 
   if (!conditionEndRound) {
+    return
+  }
+
+  if (room.status === 'the-flop') {
+    await toTheTurn({ roomId: room.id })
+    return
+  }
+
+  if (room.status === 'the-turn') {
+    await toTheRiver({ roomId: room.id })
+    return
+  }
+
+  if (room.status === 'the-river') {
+    await toShowDown({ roomId: room.id })
+  }
+}
+
+export async function allInBet({ roomId, userId }: CallBetParams) {
+  const room = await getRoomById(roomId)
+  const user = await getUserById(userId)
+
+  if (!room || !user) {
+    throw new Error('Not found user or room')
+  }
+
+  const player = room.players?.find((p) => p.userId === user.id)!
+
+  player.bet = player.bet + player.balance
+  player.balance = 0
+  room.allInPlayers = room.allInPlayers ? [...room.allInPlayers, player.userId] : [player.userId]
+
+  let turnInCreaseAmount = 1
+  while (1) {
+    const nextPlayer = room.players?.find((p, index) => {
+      return index === (room.turn! + turnInCreaseAmount) % room.players!.length
+    })?.userId
+
+    if (nextPlayer && (room.foldPlayers?.includes(nextPlayer) || room.allInPlayers?.includes(nextPlayer))) {
+      turnInCreaseAmount++
+      continue
+    }
+
+    break
+  }
+
+  room.turn = (room?.turn || 0) + turnInCreaseAmount
+  await updateData({ collectionName: 'rooms', data: room })
+
+  // handle case end of rouse
+  const unCallAndNotFoldPlayer = room.players?.find(
+    (p) =>
+      p.bet < (room.checkValue || 0) && !room.foldPlayers?.includes(p.userId) && !room.allInPlayers?.includes(p.userId)
+  )
+  if (unCallAndNotFoldPlayer) {
+    return
+  }
+
+  // need to go to next round
+  if (room.status === 'pre-flop') {
+    await toTheFlop({ roomId: room.id })
     return
   }
 
@@ -360,7 +426,7 @@ export async function raiseBet({ roomId, userId, raiseValue }: RaisePetParams) {
       return index === (room.turn! + turnInCreaseAmount) % room.players!.length
     })?.userId
 
-    if (nextPlayer && room.foldPlayers?.includes(nextPlayer)) {
+    if (nextPlayer && (room.foldPlayers?.includes(nextPlayer) || room.allInPlayers?.includes(nextPlayer))) {
       turnInCreaseAmount++
       continue
     }
@@ -386,7 +452,7 @@ export async function toTheTurn({ roomId }: { roomId: string }) {
       return index === (room.turn! + turnInCreaseAmount) % room.players!.length
     })?.userId
 
-    if (nextPlayer && room.foldPlayers?.includes(nextPlayer)) {
+    if (nextPlayer && (room.foldPlayers?.includes(nextPlayer) || room.allInPlayers?.includes(nextPlayer))) {
       turnInCreaseAmount++
       continue
     }
@@ -418,7 +484,7 @@ export async function toTheRiver({ roomId }: { roomId: string }) {
       return index === (room.turn! + turnInCreaseAmount) % room.players!.length
     })?.userId
 
-    if (nextPlayer && room.foldPlayers?.includes(nextPlayer)) {
+    if (nextPlayer && (room.foldPlayers?.includes(nextPlayer) || room.allInPlayers?.includes(nextPlayer))) {
       turnInCreaseAmount++
       continue
     }
@@ -505,10 +571,25 @@ export async function toNextMatch({ roomId }: { roomId: string }) {
   room.bigBlind = room.players?.[(dealerIndex + 2) % numberOfPlayers].userId
   room.deck = [...deck]
   room.foldPlayers = []
+  room.allInPlayers = []
   room.boardCards = []
   room.checkingPlayers = []
   room.readyPlayers = []
   room.winner = null
+
+  const eliminatedPlayers = room.players?.filter((p) => p.balance === 0)
+  const q = query(collection(db, 'users'), where('id', 'in', eliminatedPlayers))
+  const querySnapshot = await getDocs(q)
+  const updateQuery: Promise<void>[] = []
+  querySnapshot.forEach((doc) => {
+    const player = { ...doc.data(), id: doc.id }
+    // @ts-ignore
+    player.currentRoom = null
+    updateQuery.push(updateData({ collectionName: 'users', data: player }))
+  })
+  await Promise.all(updateQuery)
+
+  room.players = room.players?.filter((p) => p.balance !== 0)
   room.players?.forEach((p) => {
     p.hand = { handCards: drawCard(room.deck!, 2) }
     if (p.userId === room.smallBlind) {
@@ -548,7 +629,7 @@ export async function foldBet({ roomId, userId }: CallBetParams) {
       return index === (room.turn! + turnInCreaseAmount) % room.players!.length
     })?.userId
 
-    if (nextPlayer && room.foldPlayers?.includes(nextPlayer)) {
+    if (nextPlayer && (room.foldPlayers?.includes(nextPlayer) || room.allInPlayers?.includes(nextPlayer))) {
       turnInCreaseAmount++
       continue
     }
@@ -561,7 +642,8 @@ export async function foldBet({ roomId, userId }: CallBetParams) {
 
   // handle case end of rouse
   const conditionEndRound =
-    (room.checkingPlayers?.length || 0) + (room.foldPlayers?.length || 0) === room.players?.length
+    (room.checkingPlayers?.length || 0) + (room.foldPlayers?.length || 0) + (room.allInPlayers?.length || 0) ===
+    room.players?.length
 
   if (!conditionEndRound) {
     return
