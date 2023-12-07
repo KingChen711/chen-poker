@@ -14,11 +14,8 @@ export function useRoom(roomId: string) {
   const [winner, setWinner] = useState<Player | null>(null)
 
   useEffect(() => {
-    if (room?.winner) {
-      setWinner(players.find((p) => p.userId === room.winner) || null)
-    } else {
-      setWinner(null)
-    }
+    const winnerId = room?.gameObj?.winner
+    setWinner(winnerId ? players.find((p) => p.userId === winnerId) || null : null)
   }, [room, players])
 
   useEffect(() => {
@@ -27,17 +24,17 @@ export function useRoom(roomId: string) {
   }, [players, user])
 
   useEffect(() => {
-    if (!room || !room.inGame) {
+    if (!room || room.status === 'pre-game') {
       return
     }
-    const index = room.turn % room?.players.length
+    const index = room.gameObj.turn % room.players.length
     setPlayingPerson(room.players[index].userId)
   }, [room])
 
   useEffect(() => {
     let pot = 0
     players.forEach((p) => {
-      pot += p.bet
+      pot += p.bet!
     })
     setPot(pot)
   }, [players])

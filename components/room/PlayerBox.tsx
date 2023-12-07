@@ -27,6 +27,7 @@ function PlayerBox({
   showDealer,
   showSmallBlind
 }: Props) {
+  console.log({ hand: player.hand })
   return (
     <div
       key={player.userId}
@@ -50,18 +51,18 @@ function PlayerBox({
 
       <div className='absolute bottom-0 z-10 flex w-full items-center justify-center'>
         <div className='relative mr-1 aspect-square w-[13%]'>
-          <Image fill src={player.user.picture} alt='avatar' className='rounded-full' />
+          <Image fill src={player.user?.picture || ''} alt='avatar' className='rounded-full' />
         </div>
         <div className='text-[1.2cqw] font-medium max-md:text-[2.0cqw] max-sm:text-[2.5cqw]'>
-          {player.user.username}
+          {player.user?.username || ''}
         </div>
       </div>
 
       <HoleCard
         className=''
         winner={winner || undefined}
-        firstCard={player.hand.handCards[0]}
-        secondCard={player.hand.handCards[1]}
+        firstCard={player.hand?.holeCards[0]}
+        secondCard={player.hand?.holeCards[1]}
         hidden={currentUser?.userId !== player.userId && !winner}
       />
 

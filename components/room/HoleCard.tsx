@@ -12,7 +12,7 @@ function HoleCard({ winner, firstCard, secondCard, hidden = false, className }: 
         {winner && <div className='absolute inset-0 z-30 translate-x-[30%] rotate-12 rounded-md bg-black/50'></div>}
         <Image
           fill
-          src={hidden ? '/assets/cards/back-card.jpg' : getCardImage(firstCard!) || ''}
+          src={hidden ? '/assets/cards/back-card.jpg' : (firstCard && getCardImage(firstCard)) || ''}
           alt='first card'
           className={cn(
             'rounded-md absolute translate-x-[30%] rotate-12',
@@ -24,7 +24,7 @@ function HoleCard({ winner, firstCard, secondCard, hidden = false, className }: 
         {winner && <div className='absolute inset-0 z-30 -rotate-12 bg-black/50'></div>}
         <Image
           fill
-          src={hidden ? '/assets/cards/back-card.jpg' : getCardImage(secondCard!) || ''}
+          src={hidden ? '/assets/cards/back-card.jpg' : (secondCard && getCardImage(secondCard)) || ''}
           alt='second card'
           className={cn('rounded-md absolute -rotate-12', winner && isWinnerCard(winner, secondCard!) && 'z-50')}
         />

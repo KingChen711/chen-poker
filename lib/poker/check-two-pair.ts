@@ -18,7 +18,7 @@ export function checkTwoPair(hand: Hand) {
 
   // now, this hand is sure 2 pair, let's find the rank and cards
   const amountOfValue: AmountOfValue = {}
-  for (const card of hand.handCards) {
+  for (const card of hand?.holeCards) {
     const key = card.value.valueOf().toString()
     amountOfValue[key] = amountOfValue[key] ? amountOfValue[key] + 1 : 1
   }
@@ -38,9 +38,9 @@ export function checkTwoPair(hand: Hand) {
     }
   }
 
-  const firstPairCards = hand.handCards.filter((card) => card.value.valueOf() === firstPairValue)
-  const secondPairCards = hand.handCards.filter((card) => card.value.valueOf() === secondPairValue)
-  const lastCard = hand.handCards
+  const firstPairCards = hand?.holeCards.filter((card) => card.value.valueOf() === firstPairValue)
+  const secondPairCards = hand?.holeCards.filter((card) => card.value.valueOf() === secondPairValue)
+  const lastCard = hand?.holeCards
     .filter((card) => card.value.valueOf() !== firstPairValue && card.value.valueOf() !== secondPairValue)
     .toSorted(compareCard)[0]
 

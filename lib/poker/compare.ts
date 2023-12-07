@@ -1,7 +1,7 @@
 import { Card, Hand } from '@/types'
 
 // const ToBreakTieValue = (hand: Hand) => {
-//   const bigInts = hand.handCards
+//   const bigInts = hand?.holeCards
 //     .map((card) => {
 //       return card?.value!
 //     })

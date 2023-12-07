@@ -9,50 +9,50 @@ import { checkTwoPair } from './check-two-pair'
 import { checkOnePair } from './check-one-pair'
 import { checkHighCard } from './check-high-card'
 
-export function assignRankHand(hand: Hand, boardCards: Card[]): Hand {
+export function assignRankHand(hand: Hand, communityCards: Card[]): Hand {
   const cloneHandLHand: Hand = {
     ...hand,
-    handCards: [...hand.handCards, ...boardCards]
+    holeCards: [...hand?.holeCards, ...communityCards]
   }
   const checkRFOrSF = checkRoyalFlushOrStraightFlush(cloneHandLHand)
   if (checkRFOrSF) {
-    return { ...checkRFOrSF, handCards: hand.handCards }
+    return { ...checkRFOrSF, holeCards: hand?.holeCards }
   }
 
   const checkFourKind = checkFourOfKind(cloneHandLHand)
   if (checkFourKind) {
-    return { ...checkFourKind, handCards: hand.handCards }
+    return { ...checkFourKind, holeCards: hand?.holeCards }
   }
 
   const checkFullHouseResult = checkFullHouse(cloneHandLHand)
   if (checkFullHouseResult) {
-    return { ...checkFullHouseResult, handCards: hand.handCards }
+    return { ...checkFullHouseResult, holeCards: hand?.holeCards }
   }
 
   const checkFlushResult = checkFlush(cloneHandLHand)
   if (checkFlushResult) {
-    return { ...checkFlushResult, handCards: hand.handCards }
+    return { ...checkFlushResult, holeCards: hand?.holeCards }
   }
 
   const checkStraightResult = checkStraight(cloneHandLHand)
   if (checkStraightResult) {
-    return { ...checkStraightResult, handCards: hand.handCards }
+    return { ...checkStraightResult, holeCards: hand?.holeCards }
   }
 
   const checkThreeKind = checkThreeOfKind(cloneHandLHand)
   if (checkThreeKind) {
-    return { ...checkThreeKind, handCards: hand.handCards }
+    return { ...checkThreeKind, holeCards: hand?.holeCards }
   }
 
   const checkTwoPairResult = checkTwoPair(cloneHandLHand)
   if (checkTwoPairResult) {
-    return { ...checkTwoPairResult, handCards: hand.handCards }
+    return { ...checkTwoPairResult, holeCards: hand?.holeCards }
   }
 
   const checkOnePairResult = checkOnePair(cloneHandLHand)
   if (checkOnePairResult) {
-    return { ...checkOnePairResult, handCards: hand.handCards }
+    return { ...checkOnePairResult, holeCards: hand?.holeCards }
   }
 
-  return { ...checkHighCard(cloneHandLHand), handCards: hand.handCards }
+  return { ...checkHighCard(cloneHandLHand), holeCards: hand?.holeCards }
 }

@@ -9,13 +9,13 @@ export function checkFlush(hand: Hand) {
     [CardSuit.Heart]: 0
   }
 
-  for (const card of hand.handCards) {
+  for (const card of hand?.holeCards) {
     amountOfSuit[card.suit]++
   }
   for (const [suit, amount] of Object.entries(amountOfSuit)) {
     if (amount >= 5) {
       return {
-        pokerCards: hand.handCards
+        pokerCards: hand?.holeCards
           .filter((card) => card.suit.valueOf().toString() === suit)
           .toSorted(compareCard)
           .slice(0, 5),

@@ -109,10 +109,10 @@ function InGameBoard({ room, currentUser, players, playingPerson, pot, winner }:
       {winner && !room?.readyPlayers?.includes(currentUser?.userId || '') && (
         <div className='fixed inset-0 z-10 flex flex-col bg-black/50 font-merriweather font-black'>
           <div className='mt-[3%] flex items-center justify-center text-[3cqw] font-medium text-white'>
-            <p className='capitalize text-primary'>{winner.user.username} Thắng!</p>
+            <p className='capitalize text-primary'>{winner.user?.username} Thắng!</p>
           </div>
           <div className='flex items-center justify-center text-[3cqw] font-medium italic text-primary'>
-            {CardRank.get(winner.hand.rank!)}
+            {CardRank.get(winner.hand?.rank!)}
           </div>
 
           {players.map((p) => p.userId).includes(currentUser?.userId || '') && (
@@ -144,9 +144,9 @@ function InGameBoard({ room, currentUser, players, playingPerson, pot, winner }:
         )
       })}
 
-      {room?.boardCards && room.boardCards.length > 0 && (
+      {room?.communityCards && room.communityCards.length > 0 && (
         <div className='absolute left-1/2 top-1/2 z-20 mx-auto flex w-[45%] -translate-x-1/2 -translate-y-1/2 gap-3'>
-          {room?.boardCards.map((card) => {
+          {room?.communityCards.map((card) => {
             return (
               <div key={`${card.suit}-${card.value}`} className={cn('relative aspect-[0.6857] w-[20%]')}>
                 {winner && <div className='absolute inset-0 z-30 rounded-lg bg-black/50'></div>}
@@ -176,29 +176,31 @@ function InGameBoard({ room, currentUser, players, playingPerson, pot, winner }:
         )}
         {playingPerson === currentUser?.userId && !winner && (
           <div className='flex items-center justify-center gap-4'>
-            {(currentUser?.bet || 0) < (room?.checkValue || 0) &&
-              currentUser.balance + (currentUser?.bet || 0) > room.checkValue && (
+            {(currentUser?.bet || 0) < (room?.callingValue || 0) &&
+              (currentUser?.balance || 0) + (currentUser?.bet || 0) > (room?.callingValue || 0) && (
                 <Button onClick={handleCall}>Theo cược</Button>
               )}
-            {currentUser.balance + (currentUser?.bet || 0) <= room.checkValue && (
+            {(currentUser?.balance || 0) + (currentUser?.bet || 0) <= (room?.callingValue || 0) && (
               <Button onClick={handleAllIn}>All in</Button>
             )}
-            {(currentUser?.bet || 0) === (room?.checkValue || 0) && <Button onClick={handleCheck}>Check</Button>}
+            {(currentUser?.bet || 0) === (room?.callingValue || 0) && <Button onClick={handleCheck}>Check</Button>}
             <Dialog>
               <DialogTrigger>
-                {currentUser.balance + (currentUser?.bet || 0) > room.checkValue && <Button>Cược thêm</Button>}
+                {(currentUser?.balance || 0) + (currentUser?.bet || 0) > (room?.callingValue || 0) && (
+                  <Button>Cược thêm</Button>
+                )}
               </DialogTrigger>
               <DialogContent className='w-[400px]'>
                 <DialogHeader>
                   <DialogTitle>Cược thêm</DialogTitle>
                   <DialogDescription>
                     <div className='flex items-center gap-1 font-medium'>
-                      Tài khoản của bạn: <div className='text-lg text-primary'>{currentUser.balance}$</div>
+                      Tài khoản của bạn: <div className='text-lg text-primary'>{currentUser?.balance || 0}$</div>
                     </div>
                     <div className='flex items-center gap-1 font-medium'>
                       Số tiền cần bỏ thêm:{' '}
                       <div className='text-lg text-primary'>
-                        {(room?.checkValue || 0) - currentUser.bet + (raiseValue || 0)}$
+                        {(room?.callingValue || 0) - (currentUser?.bet || 0) + (raiseValue || 0)}$
                       </div>
                     </div>
 
@@ -223,7 +225,10 @@ function InGameBoard({ room, currentUser, players, playingPerson, pot, winner }:
                       </DialogClose>
                       <Button
                         onClick={handleRaise}
-                        disabled={(room?.checkValue || 0) - currentUser.bet + (raiseValue || 0) > currentUser.balance}
+                        disabled={
+                          (room?.callingValue || 0) - (currentUser?.bet || 0) + (raiseValue || 0) >
+                          (currentUser?.balance || 0)
+                        }
                         className='mt-4'
                       >
                         Cược
@@ -233,7 +238,7 @@ function InGameBoard({ room, currentUser, players, playingPerson, pot, winner }:
                 </DialogHeader>
               </DialogContent>
             </Dialog>
-            {(currentUser?.bet || 0) < (room?.checkValue || 0) && <Button onClick={handleFold}>Bỏ bài</Button>}
+            {(currentUser?.bet || 0) < (room?.callingValue || 0) && <Button onClick={handleFold}>Bỏ bài</Button>}
           </div>
         )}
       </div>

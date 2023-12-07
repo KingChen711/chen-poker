@@ -48,7 +48,7 @@ export function getCardImage(card: Card) {
 }
 
 export function isWinnerCard(winner: Player, card: Card) {
-  const winnerCards = winner.hand.pokerCards?.map((card) => {
+  const winnerCards = winner.hand?.pokerCards?.map((card) => {
     return JSON.stringify({ value: card.value, suit: card.suit })
   })
   const checkedCard = JSON.stringify({ value: card.value, suit: card.suit })

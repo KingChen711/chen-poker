@@ -19,7 +19,7 @@ export function checkFullHouse(hand: Hand) {
 
   // calculate amount each value
   const amountOfValue: AmountOfValue = {}
-  for (const card of hand.handCards) {
+  for (const card of hand?.holeCards) {
     const key = card.value.valueOf().toString()
     amountOfValue[key] = amountOfValue[key] ? amountOfValue[key] + 1 : 1
   }
@@ -45,7 +45,7 @@ export function checkFullHouse(hand: Hand) {
   }
 
   const cardResult = []
-  const cards = hand.handCards.toSorted(compareCard)
+  const cards = hand?.holeCards.toSorted(compareCard)
   cardResult.push(...cards.filter((card) => card.value.valueOf() === threeDupValue))
   cardResult.push(...cards.filter((card) => card.value.valueOf() === twoDupValue).slice(0, 2))
 

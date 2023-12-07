@@ -39,6 +39,7 @@ export enum Rank {
   RoyalFlush
 }
 
+// we work with firebase in this project, and the firebase will be error with undefined values, so we use '| null' instead '?:'
 export type User = {
   id: string
   clerkId: string
@@ -47,41 +48,50 @@ export type User = {
   username: string
   name: string
   createdAt: string
-  currentRoom?: string // room id
+  currentRoom: string | null
 }
 
-export type Hand = { handCards: Card[]; rank?: Rank; pokerCards?: Card[] }
+export type Hand = { holeCards: Card[]; rank: Rank | null; pokerCards: Card[] }
 
 // just use in room
 export type Player = {
   userId: string
-  user: User
+  user: User | null // just store at client
   hand: Hand
-  balance: number // init 10000
+  balance: number
   bet: number
 }
 
 // small value = 100, big value = 200
 
+export type GameObj = {
+  dealerIndex: number
+  turn: number
+  callingValue: number
+  deck: Card[]
+  dealer: string
+  smallBlind: string
+  bigBlind: string
+  foldPlayers: string[]
+  communityCards: Card[]
+  checkingPlayers: string[]
+  allInPlayers: string[]
+  readyPlayers: string[]
+  winner: string | null
+}
+
 export type Room = {
   id: string
   roomCode: string
-  roomOwner: string // user id
+  roomOwner: string
   players: Player[]
-  inGame: boolean
-
-  turn: number
-  checkValue: number
-  dealerIndex: number
-  deck: Card[]
-  dealer: string // user id
-  smallBlind: string // user id
-  bigBlind: string // user id
-  foldPlayers: string[] // user id
-  boardCards: Card[]
-  checkingPlayers: string[]
-  allInPlayers: string[]
-  readyPlayers: string[] // ready for next match not to start game
-  winner: string | null // user id
-  status: 'pre-flop' | 'the-flop' | 'the-turn' | 'the-river' | 'showdown'
-}
+} & (
+  | {
+      gameObj: GameObj
+      status: 'pre-flop' | 'the-flop' | 'the-turn' | 'the-river' | 'showdown'
+    }
+  | {
+      gameObj: null
+      status: 'pre-game'
+    }
+)

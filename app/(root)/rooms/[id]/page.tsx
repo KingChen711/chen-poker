@@ -3,26 +3,12 @@
 import InGameBoard from '@/components/room/InGameBoard'
 import Loader from '@/components/shared/Loader'
 import { Button } from '@/components/ui/button'
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger
-} from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
 import { toast } from '@/components/ui/use-toast'
-import { CardImage, CardRank } from '@/constants/deck'
-import { useCurrentUser } from '@/hooks/useCurrentUser'
 import { useRoom } from '@/hooks/useRoom'
-import { callBet, checkBet, foldBet, leaveRoom, raiseBet, readyNextMatch, startGame } from '@/lib/actions/room'
-import { cn, getCardImage, isWinnerCard } from '@/lib/utils'
-import { CardSuit, CardValue } from '@/types'
+import { leaveRoom, readyNextMatch, startGame } from '@/lib/actions/room'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 type Props = {
   params: {
@@ -59,7 +45,7 @@ function RoomDetailPage({ params }: Props) {
       await startGame({ roomId: params.id })
     } catch (error) {
       // @ts-ignore
-      if (error.message === 'At least 3 players to start a game!') {
+      if (error.message === 'At least 2 players to start a game!') {
         toast({
           variant: 'destructive',
           title: 'Số người chơi quá ít!',
@@ -81,6 +67,8 @@ function RoomDetailPage({ params }: Props) {
     }
   }
 
+  if (!room) return null
+
   return (
     <div className='flex min-h-screen flex-col pt-24'>
       <div className='flex justify-between gap-6'>
@@ -89,10 +77,10 @@ function RoomDetailPage({ params }: Props) {
         </div>
 
         <div className='flex gap-3'>
-          {room?.roomOwner === currentUser?.userId && !room?.inGame && (
+          {room?.roomOwner === currentUser?.userId && room?.status === 'pre-game' && (
             <Button onClick={handleStartGame}>Bắt đầu {isLeavingRoom && <Loader />}</Button>
           )}
-          {!room?.inGame && (
+          {room?.status === 'pre-game' && (
             <Button disabled={isLeavingRoom} onClick={handleLeaveRoom} variant='secondary'>
               Rời phòng {isLeavingRoom && <Loader />}
             </Button>
@@ -100,9 +88,10 @@ function RoomDetailPage({ params }: Props) {
         </div>
       </div>
 
-      {!room?.inGame && (
+      {room?.status === 'pre-game' && (
         <div className='mt-4 flex flex-wrap gap-8'>
           {players.map((p) => {
+            if (!p.user) return null
             return (
               <div key={p.userId} className='flex items-center gap-2'>
                 <Image src={p.user.picture} alt='player avatar' width={32} height={32} className='rounded-full' />
@@ -116,7 +105,7 @@ function RoomDetailPage({ params }: Props) {
         </div>
       )}
 
-      {room?.inGame && (
+      {room?.status !== 'pre-game' && (
         <InGameBoard
           room={room}
           currentUser={currentUser}

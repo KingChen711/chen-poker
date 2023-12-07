@@ -15,8 +15,9 @@ export async function createUser(params: CreateUserParams) {
   await addData({ collectionName: 'users', data: params })
 }
 
-export async function getUserById(userId: string) {
+export async function getUserById(userId: string): Promise<User | null> {
   const user = (await getById({ collectionName: 'users', id: userId })) as User | null
+  if (!user) return null
   return { ...user, id: userId }
 }
 

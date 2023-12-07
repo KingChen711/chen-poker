@@ -2,7 +2,7 @@ import { CardValueToBigInt } from '@/constants/deck'
 import { CardValue, Hand } from '@/types'
 
 export function handToFirstBitField(hand: Hand) {
-  const handValues = hand.handCards.map((card) => card?.value)
+  const handValues = hand?.holeCards.map((card) => card?.value)
   const uniqueValuesSet = new Set(handValues.filter(Boolean))
   const uniqueValues = Array.from(uniqueValuesSet)
 
@@ -20,7 +20,7 @@ export function handToFirstBitField(hand: Hand) {
 }
 
 export function handToSecondBitField(hand: Hand) {
-  const handValues = hand.handCards.map((card) => card?.value)
+  const handValues = hand?.holeCards.map((card) => card?.value)
   const cardValueToAmount = new Map<CardValue, number>()
 
   for (const cardValue of handValues) {

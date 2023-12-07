@@ -13,7 +13,7 @@ export function checkFourOfKind(hand: Hand) {
   }
 
   if (rest === 7) {
-    const handValues = hand.handCards.map((card) => card?.value)
+    const handValues = hand?.holeCards.map((card) => card?.value)
     const uniqueValuesSet = new Set(handValues.filter(Boolean))
     const uniqueValues = Array.from(uniqueValuesSet)
 
@@ -24,7 +24,7 @@ export function checkFourOfKind(hand: Hand) {
   }
   // now, this hand is sure four of kind, let's find the rank and cards
   const amountOfValue: any = {}
-  for (const card of hand.handCards) {
+  for (const card of hand?.holeCards) {
     const key = card.value.valueOf().toString()
     amountOfValue[key] = amountOfValue[key] ? amountOfValue[key] + 1 : 1
   }
@@ -38,8 +38,8 @@ export function checkFourOfKind(hand: Hand) {
   }
 
   // this line just pick the 4 card, need to pick the last card
-  const cardsResult = hand.handCards.filter((card) => card.value.valueOf() === fourKindValue)
-  const lastCard = hand.handCards.filter((card) => card.value.valueOf() !== fourKindValue).toSorted(compareCard)[0]
+  const cardsResult = hand?.holeCards.filter((card) => card.value.valueOf() === fourKindValue)
+  const lastCard = hand?.holeCards.filter((card) => card.value.valueOf() !== fourKindValue).toSorted(compareCard)[0]
 
   return {
     pokerCards: [...cardsResult, lastCard],

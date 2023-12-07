@@ -14,7 +14,7 @@ export function checkThreeOfKind(hand: Hand) {
 
   // now, this hand is sure three of kind, let's find the rank and cards
   const amountOfValue: any = {}
-  for (const card of hand.handCards) {
+  for (const card of hand?.holeCards) {
     const key = card.value.valueOf().toString()
     amountOfValue[key] = amountOfValue[key] ? amountOfValue[key] + 1 : 1
   }
@@ -28,8 +28,8 @@ export function checkThreeOfKind(hand: Hand) {
   }
 
   // this line just pick the 3 card, need to pick the 2 last card
-  const cardsResult = hand.handCards.filter((card) => card.value.valueOf() === threeKindValue)
-  const lastCards = hand.handCards
+  const cardsResult = hand?.holeCards.filter((card) => card.value.valueOf() === threeKindValue)
+  const lastCards = hand?.holeCards
     .filter((card) => card.value.valueOf() !== threeKindValue)
     .toSorted(compareCard)
     .slice(0, 2)

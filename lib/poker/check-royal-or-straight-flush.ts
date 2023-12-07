@@ -42,7 +42,7 @@ function checkSetCard({ cards, min, max }: CheckSetCardParams) {
 }
 
 export function checkRoyalFlushOrStraightFlush(hand: Hand) {
-  const cards = hand.handCards as Card[]
+  const cards = hand?.holeCards as Card[]
   const bitField = handToFirstBitField(hand)
   const formattedBinary = bitField.toString(2).padStart(15, '0')
 
