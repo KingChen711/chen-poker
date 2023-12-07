@@ -86,17 +86,12 @@ function InGameBoard({ room, currentUser, players, playingPerson, pot, winner }:
   }
 
   return (
-    <div
-      style={{
-        containerType: 'size'
-      }}
-      className='aspect-[20/9] w-full min-w-[600px] rounded-[50%]'
-    >
+    <div className='relative aspect-[20/9] w-full min-w-[600px] rounded-[50%] border-4 border-primary'>
       {winner && room?.readyPlayers?.includes(currentUser?.userId || '') && (
         <div className='text-center text-xl font-medium'>Đang chờ người chơi khác tiếp tục...</div>
       )}
       {winner && !room?.readyPlayers?.includes(currentUser?.userId || '') && (
-        <div className='fixed inset-0 z-30 flex flex-col bg-black/60'>
+        <div className='fixed inset-0 z-10 flex flex-col bg-black/60'>
           <div className='mt-6 flex items-center justify-center text-3xl font-medium text-white'>
             Chúc Mừng <p className='ml-3 text-4xl font-bold text-primary'>{winner.user.username}</p>
           </div>
@@ -125,14 +120,17 @@ function InGameBoard({ room, currentUser, players, playingPerson, pot, winner }:
       })}
 
       {room?.boardCards && room.boardCards.length > 0 && (
-        <div className='absolute left-1/2 top-1/2 flex w-[45%] -translate-x-1/2 -translate-y-1/2 border-4'>
+        <div className='absolute left-1/2 top-1/2 z-20 mx-auto flex w-[45%] -translate-x-1/2 -translate-y-1/2 border-4'>
           {room?.boardCards.map((card) => {
             return (
-              <div
-                key={`${card.suit}-${card.value}`}
-                className={cn('relative z-[1] aspect-[0.6857] w-[20%]', winner && isWinnerCard(winner, card) && 'z-40')}
-              >
-                <Image fill src={getCardImage(card) || ''} alt='board card' />
+              <div key={`${card.suit}-${card.value}`} className={cn('relative aspect-[0.6857] w-[20%]')}>
+                <div className='absolute inset-0 z-30 bg-black/60'></div>
+                <Image
+                  fill
+                  src={getCardImage(card) || ''}
+                  alt='board card'
+                  className={cn(winner && isWinnerCard(winner, card) && 'z-30')}
+                />
               </div>
             )
           })}

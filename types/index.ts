@@ -75,8 +75,8 @@ export type Room = {
   dealerIndex: number
   deck: Card[]
   dealer: string // user id
-  smallHouse: string // user id
-  bigHouse: string // user id
+  smallBlind: string // user id
+  bigBlind: string // user id
   foldPlayers: string[] // user id
   boardCards: Card[]
   checkingPlayers: string[]

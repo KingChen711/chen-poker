@@ -2,7 +2,7 @@ import { addData, deleteData, getById, readData, updateData } from '@/firebase/s
 import { drawCard, generateRoomCode } from '../utils'
 import { Rank, Room, User } from '@/types'
 import { getUserById, updateUser } from './user'
-import { BalanceValue, BigHouseValue, SmallHouseValue, deck } from '@/constants/deck'
+import { BalanceValue, BigBlindValue, SmallBlindValue, deck } from '@/constants/deck'
 import { assignRankHand } from '../poker/assign-rank-hand'
 import { compareHand } from '../poker/compare'
 
@@ -28,8 +28,8 @@ export async function createRoom({ userId }: CreateRoomParams) {
       roomOwner: userId,
       players: [{ userId: user.id }],
       dealer: null,
-      smallHouse: null,
-      bigHouse: null,
+      smallBlind: null,
+      bigBlind: null,
       foldPlayers: [],
       boardCards: []
     }
@@ -256,22 +256,22 @@ export async function startGame({ roomId }: StartGameParams) {
   room.checkValue = 200
   room.turn = 3 // turn of the player next to the big house
   room.dealer = room.players?.[0].userId
-  room.smallHouse = room.players?.[1].userId
-  room.bigHouse = room.players?.[2].userId
+  room.smallBlind = room.players?.[1].userId
+  room.bigBlind = room.players?.[2].userId
   room.dealerIndex = 0
   room.inGame = true
   room.boardCards = []
   room.deck = [...deck]
   room.players?.forEach((p) => {
     p.hand = { handCards: drawCard(room.deck!, 2) }
-    if (p.userId === room.smallHouse) {
-      p.balance = BalanceValue - SmallHouseValue
-      p.bet = SmallHouseValue
+    if (p.userId === room.smallBlind) {
+      p.balance = BalanceValue - SmallBlindValue
+      p.bet = SmallBlindValue
       return
     }
-    if (p.userId === room.bigHouse) {
-      p.balance = BalanceValue - BigHouseValue
-      p.bet = BigHouseValue
+    if (p.userId === room.bigBlind) {
+      p.balance = BalanceValue - BigBlindValue
+      p.bet = BigBlindValue
       return
     }
     p.balance = BalanceValue
@@ -501,8 +501,8 @@ export async function toNextMatch({ roomId }: { roomId: string }) {
   room.checkValue = 200
   room.turn = dealerIndex + 3
   room.dealer = room.players?.[dealerIndex % numberOfPlayers].userId
-  room.smallHouse = room.players?.[(dealerIndex + 1) % numberOfPlayers].userId
-  room.bigHouse = room.players?.[(dealerIndex + 2) % numberOfPlayers].userId
+  room.smallBlind = room.players?.[(dealerIndex + 1) % numberOfPlayers].userId
+  room.bigBlind = room.players?.[(dealerIndex + 2) % numberOfPlayers].userId
   room.deck = [...deck]
   room.foldPlayers = []
   room.boardCards = []
@@ -511,14 +511,14 @@ export async function toNextMatch({ roomId }: { roomId: string }) {
   room.winner = null
   room.players?.forEach((p) => {
     p.hand = { handCards: drawCard(room.deck!, 2) }
-    if (p.userId === room.smallHouse) {
-      p.balance = p.balance - SmallHouseValue
-      p.bet = SmallHouseValue
+    if (p.userId === room.smallBlind) {
+      p.balance = p.balance - SmallBlindValue
+      p.bet = SmallBlindValue
       return
     }
-    if (p.userId === room.bigHouse) {
-      p.balance = p.balance - BigHouseValue
-      p.bet = BigHouseValue
+    if (p.userId === room.bigBlind) {
+      p.balance = p.balance - BigBlindValue
+      p.bet = BigBlindValue
       return
     }
     p.bet = 0

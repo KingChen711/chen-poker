@@ -126,8 +126,8 @@ export const CardImage: Map<string, string> = new Map<string, string>([
   [JSON.stringify({ value: CardValue.Ace, suit: CardSuit.Heart }), '/assets/cards/ace_of_hearts.svg']
 ])
 
-export const SmallHouseValue = 100
-export const BigHouseValue = 200
+export const SmallBlindValue = 100
+export const BigBlindValue = 200
 export const BalanceValue = 10000
 
 // @ts-ignore
