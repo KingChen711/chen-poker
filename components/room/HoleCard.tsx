@@ -3,7 +3,13 @@ import { Card, Player } from '@/types'
 import Image from 'next/image'
 import React from 'react'
 
-type Props = { winner?: Player; firstCard?: Card; secondCard?: Card; hidden?: boolean; className?: string }
+type Props = {
+  winner: Player | null
+  firstCard: Card
+  secondCard: Card
+  hidden?: boolean
+  className?: string
+}
 
 function HoleCard({ winner, firstCard, secondCard, hidden = false, className }: Props) {
   return (
@@ -12,7 +18,7 @@ function HoleCard({ winner, firstCard, secondCard, hidden = false, className }: 
         {winner && <div className='absolute inset-0 z-30 translate-x-[30%] rotate-12 rounded-md bg-black/50'></div>}
         <Image
           fill
-          src={hidden ? '/assets/cards/back-card.jpg' : (firstCard && getCardImage(firstCard)) || ''}
+          src={hidden ? '/assets/cards/back-card.jpg' : firstCard && getCardImage(firstCard)!}
           alt='first card'
           className={cn(
             'rounded-md absolute translate-x-[30%] rotate-12',
@@ -24,7 +30,7 @@ function HoleCard({ winner, firstCard, secondCard, hidden = false, className }: 
         {winner && <div className='absolute inset-0 z-30 -rotate-12 bg-black/50'></div>}
         <Image
           fill
-          src={hidden ? '/assets/cards/back-card.jpg' : (secondCard && getCardImage(secondCard)) || ''}
+          src={hidden ? '/assets/cards/back-card.jpg' : secondCard && getCardImage(secondCard)!}
           alt='second card'
           className={cn('rounded-md absolute -rotate-12', winner && isWinnerCard(winner, secondCard!) && 'z-50')}
         />

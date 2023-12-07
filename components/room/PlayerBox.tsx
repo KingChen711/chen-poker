@@ -7,7 +7,7 @@ import HoleCard from './HoleCard'
 type Props = {
   player: Player
   winner: Player | null
-  currentUser: Player | null
+  currentUser: Player
   posX: number
   posY: number
   showStand?: boolean
@@ -27,7 +27,10 @@ function PlayerBox({
   showDealer,
   showSmallBlind
 }: Props) {
-  console.log({ hand: player.hand })
+  if (!player.user) {
+    return
+  }
+
   return (
     <div
       key={player.userId}
@@ -44,26 +47,25 @@ function PlayerBox({
         <div className='flex justify-center rounded-md border-2 border-black bg-primary text-[1.3cqw] font-medium text-primary-foreground max-md:text-[2.3cqw] max-sm:text-[2.7cqw]'>
           ${player.bet}
         </div>
-        <div className='mx-auto flex w-[87%] justify-center rounded-md border-2 border-black bg-accent text-[1.1cqw] text-primary max-md:text-[2cqw] max-sm:text-[2.5cqw]'>
+        <div className='mx-auto flex w-[87%] justify-center rounded-md border-2 border-black bg-accent text-[1.1cqw] font-medium text-accent-foreground max-md:text-[2cqw] max-sm:text-[2.5cqw]'>
           ${player.balance}
         </div>
       </div>
 
       <div className='absolute bottom-0 z-10 flex w-full items-center justify-center'>
         <div className='relative mr-1 aspect-square w-[13%]'>
-          <Image fill src={player.user?.picture || ''} alt='avatar' className='rounded-full' />
+          <Image fill src={player.user.picture} alt='avatar' className='rounded-full' />
         </div>
         <div className='text-[1.2cqw] font-medium max-md:text-[2.0cqw] max-sm:text-[2.5cqw]'>
-          {player.user?.username || ''}
+          {player.user.username}
         </div>
       </div>
 
       <HoleCard
-        className=''
-        winner={winner || undefined}
-        firstCard={player.hand?.holeCards[0]}
-        secondCard={player.hand?.holeCards[1]}
-        hidden={currentUser?.userId !== player.userId && !winner}
+        winner={winner}
+        firstCard={player.hand.holeCards[0]}
+        secondCard={player.hand.holeCards[1]}
+        hidden={currentUser.userId !== player.userId && !winner}
       />
 
       {showDealer && (
