@@ -70,6 +70,17 @@ function RoomDetailPage({ params }: Props) {
     }
   }
 
+  const handleReadyNextMatch = async () => {
+    try {
+      if (!room || !currentUser) {
+        return
+      }
+      await readyNextMatch({ roomId: room.id, userId: currentUser.userId })
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   return (
     <div className='flex min-h-screen flex-col pt-24'>
       <div className='flex justify-between gap-6'>

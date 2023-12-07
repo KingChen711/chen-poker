@@ -8,20 +8,30 @@ type Props = { winner?: Player; firstCard?: Card; secondCard?: Card; hidden?: bo
 function HoleCard({ winner, firstCard, secondCard, hidden = false, className }: Props) {
   return (
     <div className={cn('w-full h-full', className)}>
-      <div className='absolute left-1/2 z-[2] aspect-[0.6857] w-[50%] -translate-x-2/3'>
+      <div
+        className={cn(
+          'absolute left-1/2 z-[5] aspect-[0.6857] w-[50%] -translate-x-2/3',
+          winner && isWinnerCard(winner, firstCard!) && 'z-[60]'
+        )}
+      >
         <Image
           fill
           src={hidden ? '/assets/cards/back-card.jpg' : getCardImage(firstCard!) || ''}
           alt='first card'
-          className={cn('absolute rotate-12 translate-x-[30%]', winner && isWinnerCard(winner, firstCard!) && 'z-[22]')}
+          className='absolute translate-x-[30%] rotate-12'
         />
       </div>
-      <div className='absolute left-1/2 z-[1] aspect-[0.6857] w-[50%] -translate-x-2/3'>
+      <div
+        className={cn(
+          'absolute left-1/2 aspect-[0.6857] w-[50%] -translate-x-2/3',
+          winner && isWinnerCard(winner, firstCard!) && 'z-50'
+        )}
+      >
         <Image
           fill
           src={hidden ? '/assets/cards/back-card.jpg' : getCardImage(secondCard!) || ''}
           alt='second card'
-          className={cn('absolute -rotate-12', winner && isWinnerCard(winner, secondCard!) && 'z-[21]')}
+          className='absolute -rotate-12'
         />
       </div>
     </div>

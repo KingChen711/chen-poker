@@ -74,7 +74,6 @@ function InGameBoard({ room, currentUser, players, playingPerson, pot, winner }:
       console.log(error)
     }
   }
-
   const handleReadyNextMatch = async () => {
     try {
       if (!room || !currentUser) {
@@ -85,18 +84,19 @@ function InGameBoard({ room, currentUser, players, playingPerson, pot, winner }:
       console.log(error)
     }
   }
+
   return (
     <div
       style={{
         containerType: 'size'
       }}
-      className='relative aspect-[22/9] w-full min-w-[600px] rounded-[50%]'
+      className='aspect-[20/9] w-full min-w-[600px] rounded-[50%]'
     >
       {winner && room?.readyPlayers?.includes(currentUser?.userId || '') && (
         <div className='text-center text-xl font-medium'>Đang chờ người chơi khác tiếp tục...</div>
       )}
       {winner && !room?.readyPlayers?.includes(currentUser?.userId || '') && (
-        <div className='fixed inset-0 z-10 flex flex-col bg-black/60'>
+        <div className='fixed inset-0 z-30 flex flex-col bg-black/60'>
           <div className='mt-6 flex items-center justify-center text-3xl font-medium text-white'>
             Chúc Mừng <p className='ml-3 text-4xl font-bold text-primary'>{winner.user.username}</p>
           </div>
@@ -109,7 +109,6 @@ function InGameBoard({ room, currentUser, players, playingPerson, pot, winner }:
           </Button>
         </div>
       )}
-
       {players?.map((p, index) => {
         const { x, y } = getPlayerPosition(index + 1, players.length + 1)
         return (
@@ -129,30 +128,28 @@ function InGameBoard({ room, currentUser, players, playingPerson, pot, winner }:
         <div className='absolute left-1/2 top-1/2 flex w-[45%] -translate-x-1/2 -translate-y-1/2 border-4'>
           {room?.boardCards.map((card) => {
             return (
-              <div key={`${card.suit}-${card.value}`} className='relative z-[1] aspect-[0.6857] w-[20%]'>
-                <Image
-                  fill
-                  src={getCardImage(card) || ''}
-                  alt='board card'
-                  className={cn(winner && isWinnerCard(winner, card) && 'z-20')}
-                />
+              <div
+                key={`${card.suit}-${card.value}`}
+                className={cn('relative z-[1] aspect-[0.6857] w-[20%]', winner && isWinnerCard(winner, card) && 'z-40')}
+              >
+                <Image fill src={getCardImage(card) || ''} alt='board card' />
               </div>
             )
           })}
         </div>
       )}
 
-      {playingPerson === currentUser?.userId && !winner && (
-        <div
-          style={{
-            left: '50%',
-            top: '0%'
-          }}
-          className='absolute mt-[3%] flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-4'
-        >
-          <div className='flex items-center gap-1 font-medium'>
-            Tổng tiền cược: <div className='text-2xl font-bold text-primary'>{pot}$</div>
-          </div>
+      <div
+        style={{
+          left: '50%',
+          top: '0%'
+        }}
+        className='absolute mt-[3%] flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-4'
+      >
+        <div className='flex items-center gap-1 font-medium'>
+          Tổng tiền cược: <div className='text-2xl font-bold text-primary'>{pot}$</div>
+        </div>
+        {playingPerson === currentUser?.userId && !winner && (
           <div className='flex items-center justify-center gap-4'>
             {(currentUser?.bet || 0) < (room?.checkValue || 0) && <Button onClick={handleCall}>Theo cược</Button>}
             {(currentUser?.bet || 0) === (room?.checkValue || 0) && <Button onClick={handleCheck}>Check</Button>}
@@ -207,8 +204,8 @@ function InGameBoard({ room, currentUser, players, playingPerson, pot, winner }:
             </Dialog>
             {(currentUser?.bet || 0) < (room?.checkValue || 0) && <Button onClick={handleFold}>Bỏ bài</Button>}
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   )
 }

@@ -52,6 +52,7 @@ export function isWinnerCard(winner: Player, card: Card) {
     return JSON.stringify({ value: card.value, suit: card.suit })
   })
   const checkedCard = JSON.stringify({ value: card.value, suit: card.suit })
+
   return winnerCards?.includes(checkedCard)
 }
 

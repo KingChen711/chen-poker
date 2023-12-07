@@ -23,7 +23,12 @@ function PlayerBox({ player, winner, currentUser, posX, posY, showStand }: Props
       }}
       className='absolute flex aspect-[1.08/1] w-[17%] -translate-x-1/2 -translate-y-1/2 flex-col'
     >
-      <div className='absolute bottom-[15%] left-1/2 z-[3] flex w-[75%] -translate-x-1/2 flex-col'>
+      <div
+        className={cn(
+          'absolute bottom-[15%] left-1/2 z-10 flex w-[75%] -translate-x-1/2 flex-col',
+          winner?.userId === player.userId && 'z-[100]'
+        )}
+      >
         <div className='flex justify-center rounded-md border-2 border-black bg-primary text-[1.7cqw] font-medium text-primary-foreground'>
           ${player.bet}
         </div>
@@ -32,7 +37,7 @@ function PlayerBox({ player, winner, currentUser, posX, posY, showStand }: Props
         </div>
       </div>
 
-      <div className='absolute bottom-0 z-[3] flex w-full items-center justify-center'>
+      <div className='absolute bottom-0 flex w-full items-center justify-center'>
         <div className='relative mr-1 aspect-square w-[10%]'>
           <Image fill src={player.user.picture} alt='avatar' className='rounded-full' />
         </div>
@@ -40,7 +45,6 @@ function PlayerBox({ player, winner, currentUser, posX, posY, showStand }: Props
       </div>
 
       <HoleCard
-        className='absolute'
         winner={winner || undefined}
         firstCard={player.hand.handCards[0]}
         secondCard={player.hand.handCards[1]}
