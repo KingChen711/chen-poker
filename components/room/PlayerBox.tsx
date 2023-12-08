@@ -86,7 +86,7 @@ function PlayerBox({
 
       {showStand && !winner && (
         <div className='stand-player'>
-          <div className='absolute inset-[2%] -z-50 rounded-[50%] bg-background'></div>
+          <div className='absolute inset-[2%] -z-40 rounded-[50%] bg-background'></div>
         </div>
       )}
     </div>

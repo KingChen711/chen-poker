@@ -62,7 +62,7 @@ export type Player = {
   bet: number
 }
 
-// small value = 100, big value = 200
+
 
 export type GameObj = {
   dealerIndex: number

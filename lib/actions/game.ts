@@ -415,7 +415,7 @@ export async function readyNextMatch({ roomId, userId }: CallBetParams) {
 
   await updateData({ collectionName: 'rooms', data: room })
 
-  if (gameObj.readyPlayers.length !== room.players?.length) {
+  if (gameObj.readyPlayers.length !== room.players.length) {
     return
   }
 
@@ -454,15 +454,17 @@ export async function toNextMatch({ roomId }: { roomId: string }) {
   gameObj.winner = null
 
   const eliminatedPlayers = room.players.filter((p) => p.balance === 0)
-  const q = query(collection(db, 'users'), where('id', 'in', eliminatedPlayers))
-  const querySnapshot = await getDocs(q)
-  const updateQuery: Promise<void>[] = []
-  querySnapshot.forEach((doc) => {
-    const player = { ...doc.data(), id: doc.id } as User
-    player.currentRoom = null
-    updateQuery.push(updateData({ collectionName: 'users', data: player }))
-  })
-  await Promise.all(updateQuery)
+  if (eliminatedPlayers.length > 0) {
+    const q = query(collection(db, 'users'), where('id', 'in', eliminatedPlayers))
+    const querySnapshot = await getDocs(q)
+    const updateQuery: Promise<void>[] = []
+    querySnapshot.forEach((doc) => {
+      const player = { ...doc.data(), id: doc.id } as User
+      player.currentRoom = null
+      updateQuery.push(updateData({ collectionName: 'users', data: player }))
+    })
+    await Promise.all(updateQuery)
+  }
 
   room.players = room.players.filter((p) => p.balance !== 0)
   room.players.forEach((p) => {
