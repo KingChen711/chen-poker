@@ -33,32 +33,35 @@ function PlayerBox({
 
   return (
     <div
-      key={player.userId}
       style={{
         left: `${posX}%`,
         top: `${posY}%`
       }}
       className={cn(
-        'absolute flex aspect-[1.08/1] w-[15%] -translate-x-1/2 -translate-y-1/2 flex-col',
+        'absolute flex aspect-[1.08/1] w-[17%] -translate-x-1/2 -translate-y-1/2 flex-col',
         winner?.userId === player.userId && 'z-20'
       )}
     >
-      <div className='absolute bottom-[15%] left-1/2 z-10 flex w-[75%] -translate-x-1/2 flex-col'>
-        <div className='flex justify-center rounded-md border-2 border-black bg-primary text-[1.3cqw] font-medium text-primary-foreground max-md:text-[2.3cqw] max-sm:text-[2.7cqw]'>
+      <div
+        style={{ containerType: 'size' }}
+        className='absolute bottom-[57%] left-1/2 z-10 flex w-[75%] -translate-x-1/2 flex-col'
+      >
+        <div className='flex justify-center rounded-md border-2 border-black bg-primary text-[15cqw] font-medium text-primary-foreground'>
           ${player.bet}
         </div>
-        <div className='mx-auto flex w-[87%] justify-center rounded-md border-2 border-black bg-accent text-[1.1cqw] font-medium text-accent-foreground max-md:text-[2cqw] max-sm:text-[2.5cqw]'>
+        <div className='mx-auto flex w-[87%] justify-center rounded-md border-2 border-black bg-accent text-[13cqw] font-medium text-accent-foreground'>
           ${player.balance}
         </div>
       </div>
 
-      <div className='absolute bottom-0 z-10 flex w-full items-center justify-center'>
+      <div
+        style={{ containerType: 'size' }}
+        className='absolute bottom-[11%] z-10 flex w-full items-center justify-center'
+      >
         <div className='relative mr-1 aspect-square w-[13%]'>
           <Image fill src={player.user.picture} alt='avatar' className='rounded-full' />
         </div>
-        <div className='text-[1.2cqw] font-medium max-md:text-[2.0cqw] max-sm:text-[2.5cqw]'>
-          {player.user.username}
-        </div>
+        <div className='text-[12cqw] font-medium'>{player.user.username}</div>
       </div>
 
       <HoleCard

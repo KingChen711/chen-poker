@@ -55,7 +55,7 @@ function RoomDetailPage({ params }: Props) {
   if (!room) return null
 
   return (
-    <div className='mx-auto flex min-h-screen w-10/12 flex-col pt-24'>
+    <div className='mx-auto flex min-h-screen flex-col pt-24'>
       <div className='fixed inset-0 -z-50 bg-[url("/assets/images/bg-room.jpg")]' />
       <div className='mt-2 flex justify-between gap-6'>
         <div>
