@@ -164,3 +164,21 @@ export async function getRoomById(roomId: string): Promise<Room | null> {
   if (!room) return null
   return { ...room, id: roomId }
 }
+
+export async function cleanUp(userId: string) {
+  const user = await getUserById(userId)
+
+  if (!user) {
+    throw new Error('Not found user!')
+  }
+
+  const room = user.currentRoom ? await getRoomById(user.currentRoom) : null
+
+  if (!room) {
+    throw new Error('Not found room!')
+  }
+
+  if (room.status === 'pre-game') {
+    leaveRoom({ userId })
+  }
+}

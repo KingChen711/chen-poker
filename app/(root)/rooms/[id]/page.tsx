@@ -9,7 +9,7 @@ import { startGame } from '@/lib/actions/game'
 import { leaveRoom } from '@/lib/actions/room'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 type Props = {
   params: {
@@ -22,7 +22,7 @@ function RoomDetailPage({ params }: Props) {
   const { room, players, playingPerson, pot, currentUser, winner } = useRoom(params.id)
   const [isLeavingRoom, setIsLeavingRoom] = useState(false)
 
-  const handleLeaveRoom = async () => {
+  const handleLeaveRoom = useCallback(async () => {
     setIsLeavingRoom(true)
     try {
       if (currentUser) {
@@ -34,7 +34,7 @@ function RoomDetailPage({ params }: Props) {
     } finally {
       setIsLeavingRoom(false)
     }
-  }
+  }, [router, currentUser])
 
   const handleStartGame = async () => {
     try {
@@ -51,6 +51,42 @@ function RoomDetailPage({ params }: Props) {
       console.log(error)
     }
   }
+
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (!currentUser) {
+        return
+      }
+      // Gửi dữ liệu bất đồng bộ sử dụng navigator.sendBeacon()
+      const data = {
+        userId: currentUser.userId
+      }
+
+      const endpoint = '/api/cleanup'
+      const blob = new Blob([JSON.stringify(data)], { type: 'application/json' })
+
+      // Kiểm tra nếu navigator.sendBeacon() được hỗ trợ
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon(endpoint, blob)
+      } else {
+        // Nếu không hỗ trợ, có thể sử dụng XMLHttpRequest hoặc fetch thông thường
+        fetch(endpoint, {
+          method: 'POST',
+          body: blob,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+      }
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
+
+    return () => {
+      // Loại bỏ sự kiện khi component bị unmount
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+    }
+  }, [currentUser])
 
   if (!room) return null
 
