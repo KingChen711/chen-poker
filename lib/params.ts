@@ -49,3 +49,8 @@ export type ShowDownFoldParams = {
   roomId: string
   lastFoldPlayer: string
 }
+
+export type CleanUpInGameRoomParams = {
+  roomId: string
+  userId: string
+}

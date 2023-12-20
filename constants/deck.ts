@@ -131,7 +131,7 @@ export const BigBlindValue = 2
 export const BalanceValue = 1000
 
 // @ts-ignore
-type TCardRank = { [key: any]: string }
+// type TCardRank = { [key: any]: string }
 
 export const CardRank: Map<Rank, string> = new Map([
   [Rank.HighCard, 'Mậu Thầu'],

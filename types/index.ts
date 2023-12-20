@@ -62,8 +62,6 @@ export type Player = {
   bet: number
 }
 
-
-
 export type GameObj = {
   dealerIndex: number
   turn: number

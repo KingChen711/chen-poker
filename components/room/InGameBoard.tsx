@@ -1,22 +1,10 @@
-import { useRoom } from '@/hooks/useRoom'
 import { cn, getCardImage, getPlayerPosition, isWinnerCard } from '@/lib/utils'
 import Image from 'next/image'
-import React, { useState } from 'react'
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger
-} from '../ui/dialog'
+import React from 'react'
 import { Button } from '../ui/button'
-import { Input } from '../ui/input'
-import { allInBet, callBet, checkBet, foldBet, raiseBet, readyNextMatch } from '@/lib/actions/game'
+import { readyNextMatch } from '@/lib/actions/game'
 import { Player, Room } from '@/types'
 import { CardRank } from '@/constants/deck'
-import HoleCard from './HoleCard'
 import PlayerBox from './PlayerBox'
 import BetButtons from './BetButtons'
 

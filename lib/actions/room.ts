@@ -1,20 +1,16 @@
 import { addData, deleteData, getById, readData, updateData } from '@/firebase/services'
-import { drawCard, generateRoomCode } from '../utils'
-import { Rank, Room } from '@/types'
+import { generateRoomCode } from '../utils'
+import { Room } from '@/types'
 import { getUserById, updateUser } from './user'
-import { BalanceValue, BigBlindValue, SmallBlindValue, deck } from '@/constants/deck'
-import { assignRankHand } from '../poker/assign-rank-hand'
-import { compareHand } from '../poker/compare'
-import { collection, getDocs, query, where } from 'firebase/firestore'
-import { db } from '@/firebase'
+import { BalanceValue } from '@/constants/deck'
 import {
-  CallBetParams,
+  CleanUpInGameRoomParams,
   CreateRoomParams,
   GetCurrentRoomParams,
   JoinRoomParams,
-  LeaveRoomParams,
-  StartGameParams
+  LeaveRoomParams
 } from '../params'
+import { cleanUpInGameRoom } from './game'
 
 export async function createRoom({ userId }: CreateRoomParams) {
   const user = await getUserById(userId)
@@ -133,6 +129,10 @@ export async function joinRoom({ userId, roomCode }: JoinRoomParams) {
     throw new Error('You are already in another room!')
   }
 
+  if (room.players.length >= 8) {
+    throw new Error('This room is full!')
+  }
+
   if (room.status !== 'pre-game') {
     throw new Error('You cannot join a room is in game!')
   }
@@ -178,7 +178,6 @@ export async function cleanUp(userId: string) {
     throw new Error('Not found room!')
   }
 
-  if (room.status === 'pre-game') {
-    leaveRoom({ userId })
-  }
+  await leaveRoom({ userId })
+  await cleanUpInGameRoom({ userId, roomId: room.id })
 }

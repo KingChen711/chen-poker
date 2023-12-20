@@ -3,6 +3,7 @@ import {
   AllInBetParams,
   CallBetParams,
   CheckBetParams,
+  CleanUpInGameRoomParams,
   FoldBetParams,
   RaisePetParams,
   ShowDownFoldParams,
@@ -438,8 +439,8 @@ export async function toNextMatch({ roomId }: { roomId: string }) {
   room.status = 'pre-flop'
 
   const dealerIndex = gameObj.dealerIndex + 1
-  gameObj.dealerIndex = dealerIndex
   const numberOfPlayers = room.players.length
+  gameObj.dealerIndex = dealerIndex
   gameObj.callingValue = BigBlindValue
   gameObj.turn = dealerIndex + 3
   gameObj.dealer = room.players[dealerIndex % numberOfPlayers].userId
@@ -483,4 +484,56 @@ export async function toNextMatch({ roomId }: { roomId: string }) {
   })
 
   await updateData({ collectionName: 'rooms', data: room })
+}
+
+export async function cleanUpInGameRoom({ roomId, userId }: CleanUpInGameRoomParams) {
+  const room = await getRoomById(roomId)
+
+  if (!room) {
+    throw new Error('Not found room!')
+  }
+
+  if (room.status === 'pre-game') {
+    return
+  }
+
+  room.players = room.players.filter((p) => p.userId !== userId)
+  room.gameObj.allInPlayers = room.gameObj.allInPlayers.filter((p) => p !== userId)
+  room.gameObj.checkingPlayers = room.gameObj.checkingPlayers.filter((p) => p !== userId)
+  room.gameObj.foldPlayers = room.gameObj.foldPlayers.filter((p) => p !== userId)
+  room.gameObj.readyPlayers = room.gameObj.readyPlayers.filter((p) => p !== userId)
+
+  let callingValue = Number.MIN_SAFE_INTEGER
+  room.players.forEach((p) => {
+    callingValue = Math.max(callingValue, p.bet)
+  })
+  room.gameObj.callingValue = callingValue
+
+  // re-mark role
+  const dealerIndex = room.gameObj.dealerIndex
+  const numberOfPlayers = room.players.length
+  room.gameObj.dealer = room.players[dealerIndex % numberOfPlayers].userId
+  room.gameObj.smallBlind = room.players[(dealerIndex + 1) % numberOfPlayers].userId
+  room.gameObj.bigBlind = room.players[(dealerIndex + 2) % numberOfPlayers].userId
+
+  await updateData({ collectionName: 'rooms', data: room })
+
+  const playerWhoNeedToCall = room.players.find(
+    (p) =>
+      p.bet < room.gameObj.callingValue &&
+      !room.gameObj.foldPlayers.includes(p.userId) &&
+      !room.gameObj.allInPlayers.includes(p.userId)
+  )
+  const isAllUserDone =
+    room.gameObj.checkingPlayers.length + room.gameObj.foldPlayers.length + room.gameObj.allInPlayers.length ===
+    room.players?.length
+  const isShowdownStage = room.status === 'showdown'
+
+  if (!playerWhoNeedToCall && isAllUserDone && !isShowdownStage) {
+    return await toNextRound(room)
+  }
+
+  if (isShowdownStage && room.gameObj.readyPlayers.length === room.players.length) {
+    return await toNextMatch({ roomId: room.id })
+  }
 }

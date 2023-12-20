@@ -59,11 +59,11 @@
 }
 
 .primary-gradient {
-  background: linear-gradient(129deg, #E11D48 0%, #E01DBD 100%);
+  background: linear-gradient(129deg, #e11d48 0%, #e01dbd 100%);
 }
 
 .primary-text-gradient {
-  background: linear-gradient(129deg, #E11D48 0%, #E01DBD 100%);
+  background: linear-gradient(129deg, #e11d48 0%, #e01dbd 100%);
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -71,7 +71,7 @@
 
 /* Clerk */
 .cl-internal-b3fm6y {
-  background: linear-gradient(129deg, #E11D48 0%, #E01DBD 100%) !important;
+  background: linear-gradient(129deg, #e11d48 0%, #e01dbd 100%) !important;
 }
 
 .stand-player {
@@ -82,7 +82,7 @@
   width: 100%;
   transform: translateX(-50%);
   border-radius: 50%;
-  background: repeating-conic-gradient(from var(--a), #E11D48 0deg 10deg, transparent 10deg 20deg);
+  background: repeating-conic-gradient(from var(--a), #e11d48 0deg 10deg, transparent 10deg 20deg);
   animation: animate 10s linear infinite;
 }
 

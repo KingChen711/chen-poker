@@ -45,7 +45,7 @@ function RoomDetailPage({ params }: Props) {
         toast({
           variant: 'destructive',
           title: 'Số người chơi quá ít!',
-          description: 'Cần ít nhất 3 người chơi để bắt đầu, hãy chia sẽ mã phòng cho bạn bè của bạn'
+          description: 'Cần ít nhất 2 người chơi để bắt đầu, hãy chia sẽ mã phòng cho bạn bè của bạn'
         })
       }
       console.log(error)
