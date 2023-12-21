@@ -502,6 +502,7 @@ export async function cleanUpInGameRoom({ roomId, userId }: CleanUpInGameRoomPar
     return await leaveRoom({ userId: room.players[0].userId })
   }
 
+  room.gameObj.turn = room.gameObj.turn % room.players.length
   room.players = room.players.filter((p) => p.userId !== userId)
   room.gameObj.allInPlayers = room.gameObj.allInPlayers.filter((p) => p !== userId)
   room.gameObj.checkingPlayers = room.gameObj.checkingPlayers.filter((p) => p !== userId)
