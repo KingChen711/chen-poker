@@ -12,6 +12,7 @@ export function useRoom(roomId: string) {
   const user = useCurrentUser()
   const [currentUser, setCurrentUser] = useState<Player | null>(null)
   const [winner, setWinner] = useState<Player | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     const winnerId = room?.gameObj?.winner
@@ -46,6 +47,7 @@ export function useRoom(roomId: string) {
       if (room) {
         setRoom(room as Room)
       }
+      setIsLoading(false)
     })
 
     return unsubscribe
@@ -71,5 +73,5 @@ export function useRoom(roomId: string) {
     fetchPlayers()
   }, [room])
 
-  return { room, players, playingPerson, pot, currentUser, winner }
+  return { room, players, playingPerson, pot, currentUser, winner, isLoading }
 }

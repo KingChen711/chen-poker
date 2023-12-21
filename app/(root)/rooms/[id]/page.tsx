@@ -19,7 +19,7 @@ type Props = {
 
 function RoomDetailPage({ params }: Props) {
   const router = useRouter()
-  const { room, players, playingPerson, pot, currentUser, winner } = useRoom(params.id)
+  const { room, players, playingPerson, pot, currentUser, winner, isLoading } = useRoom(params.id)
   const [isLeavingRoom, setIsLeavingRoom] = useState(false)
 
   const handleLeaveRoom = useCallback(async () => {
@@ -88,7 +88,13 @@ function RoomDetailPage({ params }: Props) {
     }
   }, [currentUser])
 
-  if (!room) return null
+  if (!room) {
+    if (isLoading) {
+      return <div className='inset-0 mt-96 flex items-center justify-center text-3xl'>Is loading</div>
+    } else {
+      return <div className='inset-0 mt-96 flex items-center justify-center text-3xl'>Not found the room</div>
+    }
+  }
 
   return (
     <div className='mx-auto flex min-h-screen flex-col pt-24'>

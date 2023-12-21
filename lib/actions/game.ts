@@ -9,7 +9,7 @@ import {
   ShowDownFoldParams,
   StartGameParams
 } from '../params'
-import { getRoomById } from './room'
+import { getRoomById, leaveRoom } from './room'
 import { getUserById } from './user'
 import { BalanceValue, BigBlindValue, SmallBlindValue, deck } from '@/constants/deck'
 import { drawCard } from '../utils'
@@ -495,6 +495,11 @@ export async function cleanUpInGameRoom({ roomId, userId }: CleanUpInGameRoomPar
 
   if (room.status === 'pre-game') {
     return
+  }
+
+  if (room.players.length === 1) {
+    // let's the last players leave the room
+    return await leaveRoom({ userId: room.players[0].userId })
   }
 
   room.players = room.players.filter((p) => p.userId !== userId)
