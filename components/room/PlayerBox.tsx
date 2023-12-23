@@ -14,6 +14,7 @@ type Props = {
   showDealer?: boolean
   showSmallBlind?: boolean
   showBigBlind?: boolean
+  folded?: boolean
 }
 
 function PlayerBox({
@@ -25,7 +26,8 @@ function PlayerBox({
   showStand,
   showBigBlind,
   showDealer,
-  showSmallBlind
+  showSmallBlind,
+  folded = false
 }: Props) {
   if (!player.user) {
     return
@@ -64,12 +66,18 @@ function PlayerBox({
         <div className='text-[12cqw] font-medium'>{player.user.username}</div>
       </div>
 
-      <HoleCard
-        winner={winner}
-        firstCard={player.hand.holeCards[0]}
-        secondCard={player.hand.holeCards[1]}
-        hidden={currentUser.userId !== player.userId && !winner}
-      />
+      {folded ? (
+        <div style={{ containerType: 'size' }} className='absolute z-10 w-full'>
+          <div className='flex justify-center text-[20cqw] font-medium'>Fold</div>
+        </div>
+      ) : (
+        <HoleCard
+          winner={winner}
+          firstCard={player.hand.holeCards[0]}
+          secondCard={player.hand.holeCards[1]}
+          hidden={currentUser.userId !== player.userId && !winner}
+        />
+      )}
 
       {showDealer && (
         <div className='absolute right-0 top-[61%] z-10 mr-1 aspect-square w-[25%]'>

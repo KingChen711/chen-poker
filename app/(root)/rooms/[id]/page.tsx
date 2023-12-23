@@ -98,7 +98,7 @@ function RoomDetailPage({ params }: Props) {
 
   return (
     <div className='mx-auto flex min-h-screen flex-col pt-24'>
-      <div className='fixed inset-0 -z-50 bg-[url("/assets/images/bg-room.jpeg")] bg-contain bg-no-repeat' />
+      <div className='fixed inset-0 -z-50 bg-[url("/assets/images/bg-room.jpeg")] bg-cover bg-no-repeat' />
       <div className='mt-2 flex justify-between gap-6'>
         <div>
           <div className='text-lg font-medium'>Mã phòng: {room.roomCode}</div>

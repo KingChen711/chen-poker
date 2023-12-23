@@ -33,7 +33,7 @@ function InGameBoard({ room, currentUser, players, playingPerson, pot, winner }:
   }
 
   return (
-    <div className='relative mx-auto aspect-[9/5] w-10/12 min-w-[600px] bg-[url("/assets/images/table.png")] !bg-cover !bg-center'>
+    <div className='relative mx-auto aspect-[9.1/5] w-10/12 min-w-[600px] bg-[url("/assets/images/table.png")] !bg-cover !bg-center'>
       {winner &&
         (room.gameObj.readyPlayers.includes(currentUser.userId) ? (
           <div className='text-center text-xl font-medium'>Đang chờ người chơi khác tiếp tục...</div>
@@ -73,6 +73,7 @@ function InGameBoard({ room, currentUser, players, playingPerson, pot, winner }:
             currentUser={currentUser}
             player={p}
             winner={winner}
+            folded={room.gameObj.foldPlayers.includes(p.userId)}
           />
         )
       })}

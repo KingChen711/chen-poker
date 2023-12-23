@@ -5,7 +5,12 @@ type Props = {
 }
 
 function Layout({ children }: Props) {
-  return <main className='flex min-h-screen w-full items-center justify-center'>{children}</main>
+  return (
+    <main className='relative flex min-h-screen w-full items-center justify-center bg-[url("/assets/images/bg-auth.jpeg")] bg-cover bg-no-repeat'>
+      <div className='absolute inset-0 bg-black/70' />
+      {children}
+    </main>
+  )
 }
 
 export default Layout
