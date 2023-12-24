@@ -14,7 +14,7 @@ type Props = {
 function HoleCard({ winner, firstCard, secondCard, hidden = false, className }: Props) {
   return (
     <div className={cn('w-full h-full -z-20', className)}>
-      <div className='absolute left-1/2 z-[5] aspect-[0.6857] w-[50%] -translate-x-2/3'>
+      <div className='absolute left-1/2 z-[5] aspect-[4.78/6.7] w-[50%] -translate-x-2/3'>
         {winner && <div className='absolute inset-0 z-30 translate-x-[30%] rotate-12 rounded-md bg-black/50'></div>}
         <Image
           fill
@@ -26,7 +26,7 @@ function HoleCard({ winner, firstCard, secondCard, hidden = false, className }: 
           )}
         />
       </div>
-      <div className='absolute left-1/2 aspect-[0.6857] w-[50%] -translate-x-2/3 rounded-md'>
+      <div className='absolute left-1/2 aspect-[4.78/6.7] w-[50%] -translate-x-2/3 rounded-md'>
         {winner && <div className='absolute inset-0 z-30 -rotate-12 bg-black/50'></div>}
         <Image
           fill
